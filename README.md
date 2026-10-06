@@ -44,17 +44,30 @@ Chaque dossier contient un `README.md` qui décrit son rôle, comment le lancer 
 
 ## Démarrer
 
+Démonstration complète sans matériel, en trois terminaux :
+
 ```bash
-# Base de données et serveur
-cd infra && docker compose up -d
-
-# Serveur en développement
+# 1. Serveur avec données de démonstration (2 cours, 18 étudiants, 6 séances scellées)
 cd serveur && python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]" && uvicorn app.main:app --reload
+pip install -e ".[dev]"
+presence demo
+uvicorn app.main:app --host 0.0.0.0
 
-# Firmware (ESP-IDF 5.x installé)
-cd firmware/observateur && idf.py set-target esp32 && idf.py build flash monitor
+# 2. Tableau de bord sur http://localhost:5173 (compte A001, mot de passe presence)
+cd web && npm install && npm run dev
+
+# 3. Séance en direct simulée : téléphones et observateurs virtuels
+cd serveur && presence simuler
 ```
+
+Vérifier un reçu sans faire confiance au serveur, puis simuler une falsification de la base :
+
+```bash
+python outils/verificateur-recu/verifier.py recu.json --serveur http://localhost:8000
+python outils/demo/falsifier.py      # l'onglet Audit signale la séance modifiée
+```
+
+Avec le matériel : PostgreSQL via `infra/docker-compose.yml`, firmware via `idf.py build flash monitor` dans `firmware/observateur`, application via l'APK `presence-debug-apk` produit par l'intégration continue, réseau Fabric via `registre/reseau/README.md`. Le pas à pas est dans [`outils/README.md`](outils/README.md).
 
 ## Feuille de route
 
@@ -64,7 +77,7 @@ cd firmware/observateur && idf.py set-target esp32 && idf.py build flash monitor
 | **2** | Compteur de porte, règle de cardinalité, expériences, pilote | Innovation |
 | **3** | Multi-salles, iOS, intégrations, conformité : passage au produit | Suite |
 
-Le détail est dans [`docs/feuille-de-route.md`](docs/feuille-de-route.md). Le projet en est au début de la phase 1, avec l'expérience de faisabilité Bluetooth décrite dans [`docs/experiences/01-faisabilite-ble.md`](docs/experiences/01-faisabilite-ble.md).
+Le détail est dans [`docs/feuille-de-route.md`](docs/feuille-de-route.md). Le logiciel de la phase 1 est écrit et testé en intégration continue (serveur, tableau de bord, firmware, chaincode, passerelle, application Android). Il reste à le valider sur le matériel réel, en commençant par l'expérience [`docs/experiences/01-faisabilite-ble.md`](docs/experiences/01-faisabilite-ble.md).
 
 ## Auteur
 
