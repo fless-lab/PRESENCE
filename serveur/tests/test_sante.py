@@ -1,9 +1,8 @@
-from fastapi.testclient import TestClient
+def test_sante(client):
+    r = client.get("/sante")
+    assert r.status_code == 200
+    assert r.json()["statut"] == "ok"
 
-from app.main import app
 
-
-def test_sante():
-    reponse = TestClient(app).get("/sante")
-    assert reponse.status_code == 200
-    assert reponse.json()["statut"] == "ok"
+def test_heure(client, horloge_test):
+    assert client.get("/heure").json()["ms"] == horloge_test()

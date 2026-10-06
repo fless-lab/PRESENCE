@@ -9,16 +9,24 @@ services:
       - "5432:5432"
     volumes:
       - donnees-base:/var/lib/postgresql/data
-      - ../serveur/migrations:/docker-entrypoint-initdb.d:ro
 
   serveur:
     build: ../serveur
     environment:
-      PRESENCE_BASE_URL: postgresql://presence:presence@base:5432/presence
+      PRESENCE_BASE_URL: postgresql+psycopg://presence:presence@base:5432/presence
+      PRESENCE_DONNEES: /donnees
+      PRESENCE_REGISTRE: ${PRESENCE_REGISTRE:-local}
+      PRESENCE_REGISTRE_URL: ${PRESENCE_REGISTRE_URL:-http://host.docker.internal:8800}
+      PRESENCE_CORS: http://localhost:5173
     ports:
       - "8000:8000"
+    volumes:
+      - donnees-serveur:/donnees
     depends_on:
       - base
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
   donnees-base:
+  donnees-serveur:
