@@ -5,6 +5,7 @@ Le protocole est la pièce centrale de PRESENCE : il est indépendant de la plat
 | Fichier | Rôle |
 |---|---|
 | [`SPEC-v0.1.md`](SPEC-v0.1.md) | Spécification : rôles, balise, attestation, événements, calcul, cardinalité, scellement, reçus |
+| [`API.md`](API.md) | Encodages, signature des requêtes, routes du serveur, format du reçu |
 | [`constantes.yaml`](constantes.yaml) | Valeurs partagées : UUID Bluetooth, tailles, durées, seuils |
 
 ## Règles

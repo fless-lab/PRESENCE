@@ -24,13 +24,15 @@ Un **identifiant d'appareil** vaut les 8 premiers octets de `SHA-256(clé publiq
 
 ## 3. Balise de salle (Bluetooth Low Energy)
 
-Chaque observateur annonce le service `service_uuid`. Les données de service de l'annonce contiennent :
+Chaque observateur annonce le service `service_uuid`, et dans les données fabricant (identifiant `0xFFFF`, réservé aux essais) :
 
 | Champ | Taille | Description |
 |---|---|---|
 | version | 1 octet | `0x01` pour la v0.1 |
 | salle | 2 octets | Identifiant numérique de la salle |
 | etat | 1 octet | 0 aucune séance, 1 active, 2 pause, 3 clôturée |
+
+Le détail des encodages et des routes du serveur est dans [`API.md`](API.md).
 
 Caractéristiques GATT :
 
@@ -92,9 +94,9 @@ Tous les événements sont stockés sous une forme JSON canonique (RFC 8785, JCS
   "seance": "S-2026-1006-204-01",
   "salle": 204,
   "auteur": "obs:204-A",
-  "horodatage": "2026-10-06T09:19:32.120Z",
-  "contenu": { "appareil": "a7f3c1d09e2b4f60", "compteur": 184, "numero_nonce": 51 },
-  "preuves": { "sig_appareil": "MEUCIQ…", "sig_auteur": "MEQCIA…" }
+  "horodatage": 1791278372120,
+  "contenu": { "appareil": "a7f3c1d09e2b4f60", "compteur": 184, "numero_nonce": 51, "nonce": "q3Zx…" },
+  "preuves": { "trame": "<base64>", "sig_temoin": "MEQCIA…" }
 }
 ```
 
@@ -110,9 +112,25 @@ Aucun événement n'est jamais modifié ni supprimé. Une correction est un nouv
 
 ## 7. Calcul de la présence
 
-- La durée active de la séance (hors pauses) est découpée en fenêtres de `duree_fenetre_s`.
-- Une fenêtre est **validée** pour un appareil si au moins un observateur a enregistré une attestation valide pendant cette fenêtre.
-- Statuts : *présent* (au moins `seuil_present` des fenêtres), *retard*, *départ anticipé*, *à vérifier*, *absent*.
+L'algorithme est déterministe : le serveur et tout vérificateur de reçu doivent obtenir le même résultat.
+
+1. **Intervalles actifs** : de `DEBUT` à la première `PAUSE` ou `CLOTURE`, puis de chaque `REPRISE` à la `PAUSE` ou `CLOTURE` suivante. Une séance non clôturée s'arrête à l'instant présent.
+2. **Axe actif** : les intervalles sont mis bout à bout. Un instant `t` situé dans l'intervalle `k` a pour position `somme des longueurs précédentes + (t − début_k)`. Un instant hors des intervalles est ignoré.
+3. **Nombre de fenêtres** : `W = 300 000 ms`, `A` = durée active totale. `N = ⌊A / W⌋`, plus 1 si le reste vaut au moins 120 000 ms. Si `A > 0` et `N = 0`, alors `N = 1`.
+4. **Fenêtres validées** `V` : indices `⌊position / W⌋ < N` contenant au moins une attestation de l'appareil.
+5. **Statut**, dans cet ordre :
+   - une `CORRECTION` existe pour la personne : son statut (la plus récente) ;
+   - une `DECISION` existe : `PRESENT` ou `ABSENT` (la plus récente) ;
+   - une `VALIDATION_MANUELLE` existe : `PRESENT`, marqué manuel ;
+   - l'appareil a été attesté dans une autre salle à moins de 120 s d'écart : `A_VERIFIER` ;
+   - `|V| = 0` : `ABSENT` ;
+   - `|V| / N ≥ 0,8` : `PRESENT` ;
+   - sinon, avec `f = min(V)` et `l = max(V)` :
+     - `f ≥ 3` et `|V| / (N − f) ≥ 0,8` : `RETARD` ;
+     - `l ≤ N − 3` et `|V| / (l + 1) ≥ 0,8` : `DEPART_ANTICIPE` ;
+     - sinon : `PARTIEL`.
+
+Trois fenêtres correspondent aux 15 minutes de `retard_apres_s`.
 
 ## 8. Règle de cardinalité
 
