@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PRESENCE</string>
+
+    <!-- Notifications -->
+    <string name="canal_presence">Présence active</string>
+    <string name="canal_presence_description">Notification permanente pendant que le téléphone peut attester sa présence.</string>
+    <string name="canal_alertes">Alertes</string>
+    <string name="canal_alertes_description">Actions nécessaires pour que l\'attestation continue.</string>
+    <string name="notif_presence_active">Présence active</string>
+    <string name="notif_en_attente">En attente d\'un observateur de salle</string>
+    <string name="notif_derniere_attestation">Dernière attestation à %1$s, salle %2$s</string>
+    <string name="notif_deverrouiller">Déverrouillez votre téléphone pour reprendre l\'attestation</string>
+
+    <!-- Enrôlement -->
+    <string name="enrolement_titre">Enrôler ce téléphone</string>
+    <string name="enrolement_texte">Saisissez votre matricule et le code d\'enrôlement remis par la scolarité. Le code ne sert qu\'une fois.</string>
+    <string name="enrolement_note">Une clé est créée dans le module sécurisé du téléphone. Elle ne le quitte jamais et remplace tout appareil enrôlé auparavant.</string>
+    <string name="champ_serveur">Adresse du serveur</string>
+    <string name="champ_matricule">Matricule</string>
+    <string name="champ_code">Code d\'enrôlement</string>
+    <string name="action_enroler">Enrôler</string>
+
+    <!-- Autorisations -->
+    <string name="permissions_titre">Autorisations</string>
+    <string name="permissions_texte">L\'application doit pouvoir détecter l\'observateur de la salle et lui répondre, y compris écran éteint. Elle n\'utilise pas votre position.</string>
+    <string name="perm_bluetooth">Appareils à proximité</string>
+    <string name="perm_bluetooth_detail">Détecter l\'observateur et lui transmettre l\'attestation</string>
+    <string name="perm_notifications">Notifications</string>
+    <string name="perm_notifications_detail">Indiquer que la présence est active et signaler un problème</string>
+    <string name="perm_batterie">Optimisation de la batterie</string>
+    <string name="perm_batterie_detail">Éviter que le système n\'interrompe l\'attestation</string>
+    <string name="permissions_refusees">Si la demande ne s\'affiche plus, accordez l\'autorisation depuis les réglages.</string>
+    <string name="action_reglages_application">Ouvrir les réglages de l\'application</string>
+    <string name="action_continuer">Continuer</string>
+    <string name="action_continuer_sans">Continuer sans autoriser</string>
+    <string name="action_autoriser">Autoriser</string>
+    <string name="action_exclure">Exclure</string>
+    <string name="action_activer">Activer</string>
+    <string name="action_reglages">Réglages</string>
+    <string name="action_demarrer">Démarrer</string>
+
+    <!-- Diagnostic -->
+    <string name="presence_active">Présence active</string>
+    <string name="presence_inactive">Présence inactive</string>
+    <string name="derniere_attestation">Dernière attestation %1$s, salle %2$s</string>
+    <string name="aucune_attestation">Aucune attestation pour le moment</string>
+    <string name="compteurs_attestations">%1$d réussies, %2$d échecs depuis le démarrage</string>
+    <string name="diag_bluetooth">Bluetooth</string>
+    <string name="diag_bluetooth_ok">Activé</string>
+    <string name="diag_bluetooth_ko">Désactivé : aucune attestation possible</string>
+    <string name="diag_permissions">Autorisations</string>
+    <string name="diag_permissions_ko">Accès aux appareils à proximité refusé</string>
+    <string name="diag_batterie">Batterie</string>
+    <string name="diag_batterie_ok">Application exclue de l\'optimisation</string>
+    <string name="diag_batterie_ko">Le système peut suspendre l\'attestation</string>
+    <string name="diag_service">Service</string>
+    <string name="diag_service_ko">Arrêté</string>
+    <string name="diag_service_recherche">En marche, recherche des observateurs</string>
+    <string name="diag_service_attente">En marche, recherche en pause</string>
+
+    <!-- Navigation -->
+    <string name="onglet_accueil">Accueil</string>
+    <string name="onglet_cours">Cours</string>
+    <string name="onglet_historique">Historique</string>
+    <string name="onglet_profil">Profil</string>
+    <string name="action_retour">Retour</string>
+
+    <!-- Étudiant -->
+    <string name="bonjour">Bonjour, %1$s</string>
+    <string name="section_seance_courante">Séance en cours</string>
+    <string name="aucune_seance">Aucune séance en cours</string>
+    <string name="aucune_seance_texte">Une séance de vos cours apparaît ici dès que l\'enseignant la démarre.</string>
+    <string name="fenetres">Fenêtres de 5 minutes</string>
+    <string name="fenetres_indisponibles">Le détail des fenêtres n\'est pas encore disponible.</string>
+    <string name="statut_provisoire_note">Statut provisoire, définitif à la clôture de la séance.</string>
+    <string name="erreur_chargement">Impossible de charger</string>
+    <string name="titre_historique">Historique</string>
+    <string name="historique_sous_titre">Séances passées et statut retenu</string>
+    <string name="historique_vide">Aucune séance</string>
+    <string name="historique_vide_texte">Les séances terminées de vos cours apparaîtront ici.</string>
+    <string name="statut">Statut</string>
+    <string name="salle">Salle</string>
+    <string name="horaire">Horaire</string>
+    <string name="identifiant_seance">Identifiant</string>
+
+    <!-- Reçu -->
+    <string name="section_recu">Reçu de présence</string>
+    <string name="recu_explication">Le reçu est vérifié sur ce téléphone : signature du serveur, preuve d\'inclusion de chaque événement et racine lue sur le registre.</string>
+    <string name="action_recu">Reçu</string>
+    <string name="recu_verifie">Reçu vérifié</string>
+    <string name="recu_non_verifie">Reçu non vérifié</string>
+    <string name="statut_recu">Statut du reçu</string>
+    <string name="signature_serveur">Signature du serveur</string>
+    <string name="preuves_inclusion">Preuves d\'inclusion</string>
+    <string name="ancrage_registre">Registre</string>
+    <string name="racine_identique">Racine identique</string>
+    <string name="racine_differente">Racine différente ou absente</string>
+    <string name="valide">Valide</string>
+    <string name="invalide">Invalide</string>
+    <string name="racine">Racine de Merkle</string>
+    <string name="transaction">Transaction d\'ancrage</string>
+    <string name="registre">Registre</string>
+    <string name="action_partager_recu">Partager le reçu</string>
+    <string name="partager_recu_titre">Partager le reçu</string>
+    <string name="partage_impossible">Aucune application ne peut recevoir ce fichier</string>
+
+    <!-- Profil -->
+    <string name="section_identite">Identité</string>
+    <string name="section_appareil">Appareil</string>
+    <string name="section_diagnostic">Diagnostic</string>
+    <string name="section_journal">Journal des 50 dernières tentatives</string>
+    <string name="section_compte">Compte</string>
+    <string name="matricule">Matricule</string>
+    <string name="role">Rôle</string>
+    <string name="serveur">Serveur</string>
+    <string name="identifiant_appareil">Identifiant</string>
+    <string name="modele">Modèle</string>
+    <string name="stockage_cle">Stockage de la clé</string>
+    <string name="cle_strongbox">StrongBox</string>
+    <string name="cle_tee">Environnement sécurisé (TEE)</string>
+    <string name="deverrouillage_recent">Déverrouillage récent</string>
+    <string name="exige">Exigé</string>
+    <string name="non_exige">Non exigé</string>
+    <string name="journal_vide">Aucune tentative enregistrée.</string>
+    <string name="action_exporter_journal">Exporter le journal (CSV)</string>
+    <string name="exporter_journal_titre">Exporter le journal</string>
+    <string name="action_deconnexion">Se déconnecter</string>
+    <string name="deconnexion_titre">Se déconnecter ?</string>
+    <string name="deconnexion_texte">La clé de ce téléphone sera supprimée. Pour l\'utiliser à nouveau, il faudra un nouveau code d\'enrôlement de la scolarité.</string>
+    <string name="action_deconnexion_confirmer">Supprimer la clé</string>
+    <string name="mentions">PRESENCE %1$s · Police Google Sans Flex, licence SIL Open Font License 1.1</string>
+
+    <!-- Enseignant -->
+    <string name="titre_cours">Mes cours</string>
+    <string name="en_salle_depuis">En salle %1$s depuis %2$s</string>
+    <string name="pas_detecte">Pas encore détecté dans une salle</string>
+    <string name="pas_detecte_aide">Entrez dans la salle avec le téléphone. L\'observateur le détecte en général en moins d\'une minute.</string>
+    <string name="recherche_presence">Recherche de votre présence en salle</string>
+    <string name="section_seance_ouverte">Séance ouverte</string>
+    <string name="action_reprendre_suivi">Reprendre le suivi</string>
+    <string name="section_mes_cours">Cours enseignés</string>
+    <string name="cours_vide">Aucun cours</string>
+    <string name="cours_vide_texte">Aucun cours ne vous est attribué. La scolarité peut l\'importer depuis le tableau de bord.</string>
+    <string name="action_demarrer_salle">Démarrer en salle %1$s</string>
+    <string name="action_demarrer_seance">Démarrer la séance</string>
+    <string name="seance_demarree">Séance démarrée</string>
+
+    <string name="compte_presents">Présents</string>
+    <string name="compte_retards">En retard</string>
+    <string name="compte_a_verifier">À vérifier</string>
+    <string name="compte_non_detectes">Non détectés</string>
+    <string name="fenetres_ecoulees">%1$d fenêtres de 5 minutes · %2$d inscrits</string>
+    <string name="section_inscrits">Inscrits</string>
+    <string name="inscrits_vide">Aucun inscrit</string>
+    <string name="inscrits_vide_texte">Cette séance n\'a pas encore de liste d\'inscrits.</string>
+    <string name="n_fenetres">Fenêtres validées : %1$d</string>
+    <string name="validation_manuelle">Validé à la main</string>
+    <string name="action_pause">Pause</string>
+    <string name="action_reprendre">Reprendre</string>
+    <string name="action_terminer">Terminer</string>
+    <string name="action_aller_cloture">Aller à la clôture</string>
+    <string name="terminer_titre">Terminer la séance ?</string>
+    <string name="terminer_texte">Les observateurs cessent d\'accepter des attestations. Vous pourrez ensuite traiter les cas à vérifier avant de sceller.</string>
+
+    <string name="titre_cloture">Clôture</string>
+    <string name="cloture_resume">%1$d présents, %2$d à vérifier, %3$d absents ou partiels</string>
+    <string name="section_a_verifier">À vérifier</string>
+    <string name="a_verifier_vide">Aucun cas à vérifier.</string>
+    <string name="action_confirmer_present">Confirmer présent</string>
+    <string name="action_marquer_absent">Marquer absent</string>
+    <string name="motif_confirme_present">Présence constatée par l\'enseignant</string>
+    <string name="motif_absent_constate">Absence constatée par l\'enseignant</string>
+    <string name="decision_enregistree">Décision enregistrée</string>
+    <string name="section_absents">Absents ou non détectés</string>
+    <string name="absents_vide">Tous les inscrits ont été détectés.</string>
+    <string name="action_valider_main">Valider à la main</string>
+    <string name="validation_titre">Valider %1$s</string>
+    <string name="validation_texte">La validation manuelle est enregistrée avec votre signature et ce motif.</string>
+    <string name="validation_enregistree">Validation enregistrée</string>
+    <string name="scellement_explication">Le scellement calcule la racine de Merkle de tous les événements et l\'ancre sur le registre. Toute modification ultérieure passe par une correction de la scolarité.</string>
+    <string name="action_sceller">Sceller la séance</string>
+    <string name="sceller_apres_verification">Traitez d\'abord les cas à vérifier.</string>
+    <string name="sceller_titre">Sceller la séance ?</string>
+    <string name="sceller_texte">Les statuts deviennent définitifs et la racine est ancrée sur le registre.</string>
+    <string name="section_scellement">Scellement</string>
+    <string name="seance_scellee">Séance scellée</string>
+    <string name="historique_enseignant_sous_titre">Vos séances récentes</string>
+    <string name="historique_enseignant_vide_texte">Les séances que vous démarrez apparaîtront ici.</string>
+</resources>
