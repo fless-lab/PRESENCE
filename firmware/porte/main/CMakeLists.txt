@@ -1,0 +1,3 @@
+idf_component_register(SRCS "main.c"
+                       INCLUDE_DIRS "."
+                       REQUIRES presence_protocole nvs_flash driver mbedtls esp_wifi esp_http_client)

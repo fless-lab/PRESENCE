@@ -1,0 +1,17 @@
+menu "PRESENCE"
+    config PRESENCE_SALLE
+        int "Identifiant numérique de la salle"
+        default 204
+    config PRESENCE_NOM_OBSERVATEUR
+        string "Nom de l'observateur"
+        default "204-A"
+    config PRESENCE_WIFI_SSID
+        string "Réseau Wi-Fi"
+        default "presence-proto"
+    config PRESENCE_WIFI_MDP
+        string "Mot de passe Wi-Fi"
+        default ""
+    config PRESENCE_URL_SERVEUR
+        string "Adresse du serveur"
+        default "http://192.168.1.10:8000"
+endmenu

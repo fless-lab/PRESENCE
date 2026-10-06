@@ -1,0 +1,51 @@
+# Système
+.DS_Store
+Thumbs.db
+
+# Éditeurs
+.vscode/
+.idea/
+*.swp
+
+# Secrets et configuration locale
+.env
+*.pem
+*.key
+!protocole/**/*.key.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# ESP-IDF
+firmware/**/build/
+firmware/**/sdkconfig
+firmware/**/sdkconfig.old
+firmware/**/managed_components/
+firmware/**/dependencies.lock
+
+# Android
+app-android/**/build/
+app-android/.gradle/
+app-android/local.properties
+app-android/**/*.apk
+app-android/**/*.aab
+*.jks
+
+# Node / web
+node_modules/
+web/dist/
+
+# Fabric
+registre/reseau/fabric-samples/
+registre/reseau/organizations/
+registre/chaincode/**/vendor/
+
+# Données d'expérience brutes volumineuses (garder les synthèses)
+docs/experiences/donnees-brutes/

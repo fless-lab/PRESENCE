@@ -1,0 +1,49 @@
+# Constantes partagées du protocole PRESENCE.
+# Source unique de vérité : l'application Android, les firmwares et le serveur
+# doivent reprendre exactement ces valeurs. Toute modification incrémente la version.
+
+version_protocole: "0.1"
+
+ble:
+  # Service annoncé par les observateurs de salle
+  service_uuid: "05c39e32-50d8-4214-9d1c-9ecb2c8f9364"
+  caracteristiques:
+    info:   "d6bed148-c226-4d44-a6fc-b1c2242f8cce"   # lecture : version, salle, séance, état
+    nonce:  "32f15e73-099d-475c-b214-2a497b29ce2d"   # lecture : nonce courant et son numéro
+    attest: "47ed4924-b297-4e43-8e4c-91b5665dfb9c"   # écriture : attestation signée
+  reserve: "6dab8639-01d2-4c0d-8b72-4a2fbbf370eb"    # réservé pour une évolution
+  mtu_demande: 185          # une attestation fait 88 octets, au-delà du MTU par défaut (23)
+
+cryptographie:
+  signature: "ECDSA P-256 (secp256r1), SHA-256, encodage DER"
+  hachage: "SHA-256"
+  taille_nonce_octets: 16
+  taille_id_appareil_octets: 8        # 8 premiers octets de SHA-256(clé publique SPKI DER)
+  etiquette_attestation: "PRESENCE/v0.1/ATTEST"
+  etiquette_feuille_merkle: 0x00
+  etiquette_noeud_merkle: 0x01
+
+temps:
+  renouvellement_nonce_s: 45
+  duree_fenetre_s: 300
+  envoi_lot_observateur_s: 30
+  cloture_auto_apres_fin_s: 600
+
+regles:
+  seuil_present: 0.80              # part des fenêtres actives validées
+  retard_apres_s: 900
+  tolerance_cardinalite: 2         # personnes d'écart admises avant alerte
+  fenetre_appariement_entree_s: 120
+
+etats_seance: [AUCUNE, ACTIVE, PAUSE, CLOTUREE]
+
+types_evenements:
+  - DEBUT
+  - PAUSE
+  - REPRISE
+  - CLOTURE
+  - ATTESTATION
+  - PASSAGE
+  - VALIDATION_MANUELLE
+  - DECISION
+  - CORRECTION

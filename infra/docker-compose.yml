@@ -1,0 +1,24 @@
+services:
+  base:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: presence
+      POSTGRES_PASSWORD: presence
+      POSTGRES_DB: presence
+    ports:
+      - "5432:5432"
+    volumes:
+      - donnees-base:/var/lib/postgresql/data
+      - ../serveur/migrations:/docker-entrypoint-initdb.d:ro
+
+  serveur:
+    build: ../serveur
+    environment:
+      PRESENCE_BASE_URL: postgresql://presence:presence@base:5432/presence
+    ports:
+      - "8000:8000"
+    depends_on:
+      - base
+
+volumes:
+  donnees-base:
