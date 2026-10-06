@@ -10,7 +10,7 @@ Deux programmes ESP-IDF qui partagent un composant commun.
 
 ## Prérequis
 
-ESP-IDF 5.x installé (`idf.py --version`). Pile Bluetooth : NimBLE, activée par `sdkconfig.defaults`.
+ESP-IDF v5.3 installé (`idf.py --version`). Pile Bluetooth : NimBLE, activée par `sdkconfig.defaults`.
 
 ## Compiler et flasher
 

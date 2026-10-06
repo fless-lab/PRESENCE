@@ -1,0 +1,2 @@
+# Contrôleur ESP32-S3 : 9 connexions plus l'annonce
+CONFIG_BT_CTRL_BLE_MAX_ACT=10

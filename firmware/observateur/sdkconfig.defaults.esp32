@@ -1,0 +1,2 @@
+# Contrôleur ESP32 : 3 connexions BLE par défaut, porté à 9 comme NimBLE
+CONFIG_BTDM_CTRL_BLE_MAX_CONN=9

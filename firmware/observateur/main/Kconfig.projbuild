@@ -1,6 +1,7 @@
 menu "PRESENCE"
     config PRESENCE_SALLE
         int "Identifiant numérique de la salle"
+        range 0 65535
         default 204
     config PRESENCE_NOM_OBSERVATEUR
         string "Nom de l'observateur"
@@ -12,6 +13,17 @@ menu "PRESENCE"
         string "Mot de passe Wi-Fi"
         default ""
     config PRESENCE_URL_SERVEUR
-        string "Adresse du serveur"
+        string "Adresse du serveur (sans barre oblique finale)"
         default "http://192.168.1.10:8000"
+    config PRESENCE_MODE_TEST
+        bool "Mode test (expérience 01)"
+        default n
+        help
+            Ignore la configuration du serveur : annonce une séance 1 active dans
+            la salle PRESENCE_SALLE et journalise chaque trame ATTEST reçue sans
+            vérifier la signature. Aucun témoignage n'est produit.
+    config PRESENCE_GPIO_LED
+        int "Broche du voyant d'état (-1 pour aucun)"
+        range -1 48
+        default 2
 endmenu
