@@ -190,3 +190,37 @@ Réponse : `{acceptes, rejetes: [{index, raison}]}`.
 ```
 
 Le reçu contient les événements de séance (début, pauses, clôture) et ceux qui concernent le titulaire. Le vérificateur peut donc **recalculer le statut lui-même**, puis vérifier chaque preuve d'inclusion contre la racine lue sur le registre. `sig_serveur` signe le JSON canonique du reçu sans ce champ.
+
+## 10. Contenu des événements
+
+Chaque événement a la forme `{v, type, seance, salle, auteur, horodatage, contenu, preuves}`. Le champ `contenu` dépend du type :
+
+| Type | `auteur` | `contenu` |
+|---|---|---|
+| `DEBUT` | `ens:<matricule>` | `{cours, enseignant, numero}` |
+| `PAUSE`, `REPRISE`, `CLOTURE` | `ens:<matricule>` | `{enseignant}` |
+| `ATTESTATION` | `obs:<nom>` | `{appareil, compteur, numero_nonce, nonce}` |
+| `VALIDATION_MANUELLE` | `ens:<matricule>` | `{matricule, motif}` |
+| `DECISION` | `ens:<matricule>` | `{matricule, decision, motif}` |
+| `CORRECTION` | `sco:<matricule>` | `{matricule, statut, motif}` |
+
+`preuves` contient de quoi revérifier l'événement : la trame et la signature du témoin pour une attestation, la requête signée (`{methode, chemin, horodatage, corps, sig}`) pour une action de l'enseignant ou de la scolarité.
+
+Statuts possibles : `PRESENT`, `RETARD`, `DEPART_ANTICIPE`, `PARTIEL`, `A_VERIFIER`, `ABSENT`.
+
+## 11. Preuve d'inclusion
+
+`preuve` est la liste des hachages frères, de la feuille vers la racine. Feuille : `SHA-256(0x00 | canonique en UTF-8)`. Nœud : `SHA-256(0x01 | gauche | droite)`. Vérification (RFC 9162, §2.1.3.2) :
+
+```
+fn = index ; sn = taille - 1 ; r = feuille
+pour chaque p de preuve :
+    si sn == 0 : échec
+    si fn est impair ou fn == sn :
+        r = noeud(p, r)
+        si fn est pair : tant que fn est pair et fn != 0 : fn >>= 1 ; sn >>= 1
+    sinon :
+        r = noeud(r, p)
+    fn >>= 1 ; sn >>= 1
+succès si sn == 0 et r == racine
+```
