@@ -1,4 +1,7 @@
-"""Acteurs simulés pour les tests : téléphones et observateurs avec de vraies clés P-256."""
+"""Acteurs simulés : téléphones et observateurs avec de vraies clés P-256.
+
+Utilisés par les tests, par `presence demo` et par `presence simuler`.
+"""
 
 from __future__ import annotations
 
@@ -129,3 +132,23 @@ class Observateur(Signataire):
         return client.get(
             chemin, headers=self.entetes(f"equ:{self.nom}", "GET", chemin, b"", horloge())
         )
+
+
+def exporter_cle(s: Signataire) -> str:
+    return s.cle.private_bytes(
+        serialization.Encoding.PEM,
+        serialization.PrivateFormat.PKCS8,
+        serialization.NoEncryption(),
+    ).decode()
+
+
+def importer_cle(s: Signataire, pem: str) -> None:
+    cle = serialization.load_pem_private_key(pem.encode(), password=None)
+    assert isinstance(cle, ec.EllipticCurvePrivateKey)
+    s.cle = cle
+    s.spki = cle.public_key().public_bytes(
+        serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+    s.spki_b64 = b64(s.spki)
+    if isinstance(s, Telephone):
+        s.id = hashlib.sha256(s.spki).digest()[:8].hex()

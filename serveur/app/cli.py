@@ -39,6 +39,30 @@ def ajouter_salle(args) -> None:
     print(f"Salle {args.id} : {args.nom}")
 
 
+def demo(args) -> None:
+    from app.demo import executer
+
+    seances = executer(args.mot_de_passe, args.jours)
+    print(f"{len(seances)} séances créées et scellées. Compte : A001 / {args.mot_de_passe}")
+
+
+def simuler(args) -> None:
+    from pathlib import Path
+
+    from app.simulateur import executer
+
+    executer(
+        args.url,
+        args.minutes,
+        args.periode,
+        args.cours,
+        args.enseignant,
+        args.salle,
+        not args.laisser_ouverte,
+        Path(args.sortie),
+    )
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="presence")
     sous = parser.add_subparsers(dest="commande", required=True)
@@ -55,6 +79,22 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("id", type=int)
     p.add_argument("nom")
     p.set_defaults(fonction=ajouter_salle)
+
+    p = sous.add_parser("demo", help="remplit la base avec un historique de séances scellées")
+    p.add_argument("--mot-de-passe", dest="mot_de_passe", default="presence")
+    p.add_argument("--jours", type=int, default=5)
+    p.set_defaults(fonction=demo)
+
+    p = sous.add_parser("simuler", help="joue une séance en direct contre un serveur en marche")
+    p.add_argument("--url", default="http://localhost:8000")
+    p.add_argument("--minutes", type=int, default=10)
+    p.add_argument("--periode", type=int, default=20, help="secondes entre deux attestations")
+    p.add_argument("--cours", default="SECRES")
+    p.add_argument("--enseignant", default="P001")
+    p.add_argument("--salle", type=int, default=204)
+    p.add_argument("--laisser-ouverte", action="store_true")
+    p.add_argument("--sortie", default="recu_E001.json")
+    p.set_defaults(fonction=simuler)
 
     args = parser.parse_args(argv)
     args.fonction(args)

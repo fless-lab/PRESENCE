@@ -1,15 +1,18 @@
 # Vérificateur de reçu
 
-Outil indépendant, en Python, que n'importe quel tiers peut exécuter.
+Outil indépendant : il n'utilise ni le code ni la base du serveur.
 
 ```bash
-python verifier.py recu.json --racine <racine lue sur le registre>
+pip install cryptography
+python verifier.py recu.json --serveur http://localhost:8000
+python verifier.py recu.json --cle <clé publique base64> --racine <racine du registre>
 ```
 
-Étapes :
-1. Recalculer le hachage de chaque événement du reçu (JSON canonique, préfixe 0x00).
-2. Remonter chaque preuve d'inclusion jusqu'à la racine.
-3. Comparer avec la racine lue sur le registre, pas avec celle écrite dans le reçu.
-4. Vérifier la signature du serveur sur le reçu.
+Quatre contrôles :
 
-Il réutilisera la même logique que `serveur/app/domaine/merkle.py`, recopiée ici pour rester utilisable sans le serveur.
+1. **Preuves d'inclusion** : chaque événement du reçu appartient à l'arbre de la séance (RFC 9162).
+2. **Racine** : la racine du reçu est celle ancrée sur le registre, corrections comprises.
+3. **Signature** : le reçu est signé par le serveur.
+4. **Statut** : recalculé à partir des événements du reçu, avec l'algorithme de la SPEC §7.
+
+Le code de sortie vaut 0 si le reçu est valide, 1 sinon.

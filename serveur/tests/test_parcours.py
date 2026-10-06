@@ -9,7 +9,7 @@ from app.domaine import merkle, presence
 from app.modeles import Personne
 from app.securite.jetons import hacher_mot_de_passe
 from app.services import recus
-from tests.simulation import Observateur, Telephone
+from app.simulation import Observateur, Telephone
 
 MINUTE = 60_000
 CSV = """matricule,nom,prenom,role,cours_code,cours_intitule,groupe

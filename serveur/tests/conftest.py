@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 from app import etat, horloge, registre
 from app.config import config
 from app.securite import jetons
-from tests.simulation import Horloge
+from app.simulation import Horloge
 
 
 @pytest.fixture
