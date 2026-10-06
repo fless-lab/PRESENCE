@@ -473,7 +473,9 @@ def detail(db: Session, seance: Seance) -> dict:
             ],
             "integrite": {
                 "racine": seance.racine,
-                "nb_evenements": seance.nb_evenements or 0,
+                "nb_evenements": seance.nb_evenements
+                if seance.nb_evenements is not None
+                else len(evenements.de_la_seance(db, seance.id)),
                 "registre": ancrage.get("registre"),
                 "transaction": ancrage.get("transaction"),
                 "corrections": len(ancrage.get("corrections", [])),

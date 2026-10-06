@@ -1,0 +1,181 @@
+/* Bande chronologique : intervalles actifs et pauses */
+.chronologie {
+  margin-top: var(--e2);
+}
+
+.chronologie-bande {
+  position: relative;
+  height: 20px;
+  border-radius: 4px;
+  background: var(--fond-discret);
+  overflow: hidden;
+}
+
+.chronologie-actif {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--texte);
+}
+
+.chronologie-actif.en-cours {
+  opacity: 0.7;
+}
+
+.chronologie-graduation {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.chronologie-axe {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--texte-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.legende {
+  display: flex;
+  gap: var(--e4);
+  font-size: 12px;
+  color: var(--texte-2);
+}
+
+.legende span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legende i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--fond-discret);
+}
+
+.legende i.actif {
+  background: var(--texte);
+}
+
+/* Mini-grille des fenêtres d'un étudiant */
+.grille {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  gap: 2px;
+  vertical-align: middle;
+}
+
+.grille i {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--trait);
+}
+
+.grille.dense {
+  gap: 1px;
+}
+
+.grille.dense i {
+  width: 4px;
+}
+
+.grille i.oui {
+  background: var(--texte);
+}
+
+.entete-seance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e1) var(--e5);
+  margin-top: var(--e2);
+  font-size: 13px;
+  color: var(--texte-2);
+}
+
+.entete-seance b {
+  font-weight: 500;
+  color: var(--texte);
+}
+
+/* Journal des événements */
+.journal {
+  max-height: 60vh;
+  overflow: auto;
+  font-family: var(--police-mono);
+  font-size: 12px;
+  line-height: 24px;
+}
+
+.journal table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.journal td {
+  padding: 0 var(--e3) 0 0;
+  border-bottom: 1px solid var(--fond-discret);
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+.journal td.detail {
+  white-space: normal;
+  color: var(--texte-2);
+  word-break: break-word;
+}
+
+/* Liste de contrôles du vérificateur */
+.controles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--trait);
+}
+
+.controles li {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  gap: var(--e3);
+  align-items: start;
+  padding: var(--e3) 0;
+  border-bottom: 1px solid var(--trait);
+}
+
+.controles .titre {
+  font-weight: 500;
+}
+
+.controles .detail {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--texte-2);
+}
+
+.controles .icone {
+  margin-top: 1px;
+}
+
+.controles .ok { color: var(--present); }
+.controles .echec { color: var(--absent); }
+.controles .indetermine { color: var(--texte-3); }
+
+.verdict {
+  display: flex;
+  align-items: baseline;
+  gap: var(--e3);
+  margin-bottom: var(--e4);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.verdict.ok { color: var(--present); }
+.verdict.echec { color: var(--absent); }
+.verdict.indetermine { color: var(--texte-2); }

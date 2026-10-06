@@ -1,0 +1,81 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--fond);
+  color: var(--texte);
+  font-family: var(--police);
+  font-size: 14px;
+  line-height: 20px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv11';
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgba(47, 95, 179, 0.16);
+}
+
+.mono {
+  font-family: var(--police-mono);
+  font-size: 12.5px;
+  letter-spacing: 0;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.secondaire {
+  color: var(--texte-2);
+}
+
+.tertiaire {
+  color: var(--texte-3);
+}
+
+.visuellement-cache {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Chiffres alignés sans changer l'alignement de la colonne */
+.tabulaire {
+  font-variant-numeric: tabular-nums;
+}

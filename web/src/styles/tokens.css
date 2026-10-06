@@ -1,0 +1,60 @@
+:root {
+  /* Surfaces */
+  --fond: #ffffff;
+  --fond-barre: #f6f7f9;
+  --fond-survol: #f6f7f9;
+  --fond-actif: #eceef1;
+  --fond-discret: #f0f2f4;
+  --trait: #e4e7eb;
+  --trait-fort: #d3d8de;
+
+  /* Texte */
+  --texte: #111418;
+  --texte-2: #5e6670;
+  --texte-3: #8a929c;
+
+  /* Actions */
+  --primaire: #111418;
+  --primaire-survol: #2a2f36;
+  --focus: #2f5fb3;
+
+  /* Statuts */
+  --present: #1a7f5a;
+  --retard: #b5621b;
+  --a-verifier: #2f5fb3;
+  --absent: #b42318;
+  --partiel: #6b7280;
+  --depart: #8a5a00;
+  --en-ligne: #1a7f5a;
+  --hors-ligne: #b42318;
+
+  /* Teintes à 8 % */
+  --present-teinte: rgba(26, 127, 90, 0.08);
+  --retard-teinte: rgba(181, 98, 27, 0.08);
+  --a-verifier-teinte: rgba(47, 95, 179, 0.08);
+  --absent-teinte: rgba(180, 35, 24, 0.08);
+  --partiel-teinte: rgba(107, 114, 128, 0.08);
+  --depart-teinte: rgba(138, 90, 0, 0.08);
+
+  /* Typographie */
+  --police: 'Google Sans Flex', 'Google Sans', system-ui, -apple-system, 'Segoe UI', Roboto,
+    sans-serif;
+  --police-mono: 'Google Sans Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Grille de 8 px */
+  --e1: 4px;
+  --e2: 8px;
+  --e3: 12px;
+  --e4: 16px;
+  --e5: 24px;
+  --e6: 32px;
+  --e7: 40px;
+  --e8: 48px;
+
+  --rayon: 6px;
+  --rayon-max: 8px;
+  --hauteur-bouton: 36px;
+  --hauteur-ligne: 40px;
+  --largeur-barre: 224px;
+  --largeur-contenu: 1200px;
+}
