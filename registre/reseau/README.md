@@ -29,3 +29,10 @@ La politique d'approbation `OutOf(2, ...)` exige l'accord de deux organisations 
 Attention : le script `deployCC` du réseau de test installe et approuve le chaincode pour Org1 et Org2 seulement. Pour Org3, il faut compléter avec les commandes `peer lifecycle chaincode install` et `approveformyorg` ; la procédure exacte sera notée ici lors de la mise en place.
 
 Le dossier `fabric-samples/` est ignoré par Git. Prévoir au moins 8 Go de RAM libres pour Docker.
+
+## Brancher le serveur
+
+```bash
+cd registre/passerelle && npm install && npm run build && npm start
+cd serveur && PRESENCE_REGISTRE=fabric PRESENCE_REGISTRE_URL=http://localhost:8800 uvicorn app.main:app
+```

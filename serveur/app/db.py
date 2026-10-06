@@ -17,16 +17,16 @@ class Base(DeclarativeBase):
 _moteur: Engine | None = None
 _fabrique: sessionmaker[Session] | None = None
 
-DDL_IMMUABLE = """
-CREATE OR REPLACE FUNCTION presence_refuser_modification() RETURNS trigger AS $$
+DDL_IMMUABLE = [
+    """CREATE OR REPLACE FUNCTION presence_refuser_modification() RETURNS trigger AS $$
 BEGIN
     RAISE EXCEPTION 'Les événements sont immuables : ajouter un événement CORRECTION';
 END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS evenements_immuables ON evenements;
-CREATE TRIGGER evenements_immuables BEFORE UPDATE OR DELETE ON evenements
-    FOR EACH ROW EXECUTE FUNCTION presence_refuser_modification();
-"""
+$$ LANGUAGE plpgsql""",
+    "DROP TRIGGER IF EXISTS evenements_immuables ON evenements",
+    """CREATE TRIGGER evenements_immuables BEFORE UPDATE OR DELETE ON evenements
+    FOR EACH ROW EXECUTE FUNCTION presence_refuser_modification()""",
+]
 
 
 def initialiser(url: str) -> Engine:
@@ -49,7 +49,8 @@ def initialiser(url: str) -> Engine:
     Base.metadata.create_all(_moteur)
     if _moteur.dialect.name == "postgresql":
         with _moteur.begin() as cx:
-            cx.execute(text(DDL_IMMUABLE))
+            for instruction in DDL_IMMUABLE:
+                cx.execute(text(instruction))
     _fabrique = sessionmaker(bind=_moteur, expire_on_commit=False)
     return _moteur
 

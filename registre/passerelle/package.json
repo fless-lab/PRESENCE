@@ -1,0 +1,24 @@
+{
+  "name": "presence-passerelle",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Passerelle HTTP entre le serveur PRESENCE et le chaincode d'ancrage Hyperledger Fabric",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/src/index.js",
+    "test": "tsc && node --test dist/test/*.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.14.5",
+    "@hyperledger/fabric-gateway": "^1.12.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "typescript": "~5.7.2"
+  }
+}
