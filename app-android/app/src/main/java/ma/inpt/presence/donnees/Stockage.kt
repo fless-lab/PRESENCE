@@ -37,6 +37,13 @@ class Stockage(context: Context) {
             prefs.edit().putBoolean(CLE_PERMISSIONS_VUES, value).apply()
         }
 
+    /** Dernier changement de planning déjà notifié (-1 : jamais synchronisé). */
+    var dernierChangement: Long
+        get() = prefs.getLong(CLE_CHANGEMENT, -1L)
+        set(value) {
+            prefs.edit().putLong(CLE_CHANGEMENT, value).apply()
+        }
+
     fun identite(): Identite? {
         val id = prefs.getString(CLE_ID, null) ?: return null
         return Identite(
@@ -101,6 +108,7 @@ class Stockage(context: Context) {
         private const val CLE_DEVERROUILLAGE = "deverrouillage_recent"
         private const val CLE_STRONGBOX = "strongbox"
         private const val CLE_COMPTEUR = "compteur"
+        private const val CLE_CHANGEMENT = "dernier_changement"
         private const val CLE_PERMISSIONS_VUES = "permissions_vues"
     }
 }

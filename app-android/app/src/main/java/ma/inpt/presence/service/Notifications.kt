@@ -21,6 +21,7 @@ object Notifications {
     const val CANAL_ALERTES = "alertes"
     const val ID_SERVICE = 1
     private const val ID_DEVERROUILLAGE = 2
+    private const val ID_CHANGEMENT_DEBUT = 1000
 
     fun creerCanaux(context: Context) {
         val gestionnaire = context.getSystemService(NotificationManager::class.java) ?: return
@@ -82,6 +83,19 @@ object Notifications {
             .setContentIntent(ouvrirApplication(context))
             .build()
         afficher(context, ID_DEVERROUILLAGE, notification)
+    }
+
+    /** Notifie un changement de cours (déplacement, annulation, ajout, rétablissement). */
+    fun changementCours(context: Context, id: Long, titre: String, corps: String) {
+        val notification = NotificationCompat.Builder(context, CANAL_ALERTES)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(titre)
+            .setContentText(corps)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(corps))
+            .setAutoCancel(true)
+            .setContentIntent(ouvrirApplication(context))
+            .build()
+        afficher(context, ID_CHANGEMENT_DEBUT + (id % 10_000).toInt(), notification)
     }
 
     private fun afficher(context: Context, id: Int, notification: Notification) {

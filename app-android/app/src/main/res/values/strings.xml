@@ -62,6 +62,7 @@
     <!-- Navigation -->
     <string name="onglet_accueil">Accueil</string>
     <string name="onglet_cours">Cours</string>
+    <string name="onglet_planning">Planning</string>
     <string name="onglet_historique">Historique</string>
     <string name="onglet_profil">Profil</string>
     <string name="action_retour">Retour</string>
@@ -83,6 +84,13 @@
     <string name="salle">Salle</string>
     <string name="horaire">Horaire</string>
     <string name="identifiant_seance">Identifiant</string>
+
+    <!-- Planning -->
+    <string name="titre_planning">Planning</string>
+    <string name="planning_sous_titre">Vos prochains cours. Un changement vous est signalé par notification.</string>
+    <string name="planning_vide">Aucun cours prévu</string>
+    <string name="planning_vide_texte">Les cours des prochains jours apparaîtront ici.</string>
+    <string name="planning_annule">Annulé</string>
 
     <!-- Reçu -->
     <string name="section_recu">Reçu de présence</string>

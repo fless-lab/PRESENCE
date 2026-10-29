@@ -65,6 +65,10 @@ La blockchain ne prouve pas la présence. Elle prouve que les événements enreg
 | Modification de la base | Détectée à l'audit : la racine recalculée diffère de la racine ancrée |
 | Dérive du compteur | Remise à zéro nocturne et tolérance dans la règle |
 
+## Planning
+
+Le site de l'école reste la source de l'emploi du temps. L'administration importe son export en CSV (`POST /admin/planning/import`) ; PRESENCE peut ensuite déplacer, annuler, rétablir ou ajouter un cours, avec un motif obligatoire, sans rien renvoyer au site de l'école. Un import ultérieur ne réécrit jamais un cours modifié dans PRESENCE : l'écart est signalé dans le compte rendu. Chaque modification est écrite dans un journal de changements que l'application lit par sondage (`GET /moi/changements`) pour prévenir les étudiants et enseignants du cours. Le tableau de bord se filtre par filière et niveau (SESNUM, INE3 pour la démonstration). Les codes d'enrôlement sont exportés en CSV pour le circuit d'envoi de l'école, avec une durée de validité de 14 jours.
+
 ## Hors du périmètre de la V1
 
-Gestion d'emploi du temps, client iOS, UWB, justificatifs en ligne, changement de téléphone en libre-service, suivi des heures des enseignants. Ces éléments restent dans la vision cible.
+Liaison automatique entre un créneau et la séance démarrée, notifications poussées, client iOS, UWB, justificatifs en ligne, changement de téléphone en libre-service, suivi des heures des enseignants. Ces éléments restent dans la vision cible.

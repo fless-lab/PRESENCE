@@ -53,6 +53,7 @@ import ma.inpt.presence.donnees.Stockage
 import ma.inpt.presence.reseau.ApiClient
 import ma.inpt.presence.service.PresenceService
 import ma.inpt.presence.ui.commun.ContexteApp
+import ma.inpt.presence.ui.commun.PlanningEcran
 import ma.inpt.presence.ui.commun.ProfilEcran
 import ma.inpt.presence.ui.enseignant.ClotureEcran
 import ma.inpt.presence.ui.enseignant.CoursEcran
@@ -126,12 +127,14 @@ private fun Principal(identite: Identite, surDeconnexion: () -> Unit) {
     val onglets = if (identite.estEnseignant) {
         listOf(
             Onglet("cours", stringResource(R.string.onglet_cours)),
+            Onglet("planning", stringResource(R.string.onglet_planning)),
             Onglet("historique", stringResource(R.string.onglet_historique)),
             Onglet("profil", stringResource(R.string.onglet_profil)),
         )
     } else {
         listOf(
             Onglet("accueil", stringResource(R.string.onglet_accueil)),
+            Onglet("planning", stringResource(R.string.onglet_planning)),
             Onglet("historique", stringResource(R.string.onglet_historique)),
             Onglet("profil", stringResource(R.string.onglet_profil)),
         )
@@ -191,6 +194,7 @@ private fun Principal(identite: Identite, surDeconnexion: () -> Unit) {
             composable("historique") {
                 if (identite.estEnseignant) HistoriqueEnseignantEcran(ctx) else HistoriqueEcran(ctx)
             }
+            composable("planning") { PlanningEcran(ctx) }
             composable("profil") { ProfilEcran(ctx, surDeconnexion) }
             composable(
                 "seance/{id}",

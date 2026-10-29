@@ -47,7 +47,9 @@ Chaque dossier contient un `README.md` qui décrit son rôle, comment le lancer 
 Démonstration complète sans matériel, en trois terminaux :
 
 ```bash
-# 1. Serveur avec données de démonstration (2 cours, 18 étudiants, 6 séances scellées)
+# 1. Serveur avec données de démonstration (salle 204, promotion SESNUM INE3, 2 cours, 18 étudiants,
+#    6 séances scellées, un planning avec un cours déplacé et un annulé). Les tables sont créées
+#    sans migration : après une mise à jour, relancer `presence demo` ou recréer la base.
 cd serveur && python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 presence demo

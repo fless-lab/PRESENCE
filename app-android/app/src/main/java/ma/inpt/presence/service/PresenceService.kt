@@ -21,6 +21,7 @@ import android.os.ParcelUuid
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -38,6 +39,7 @@ import ma.inpt.presence.donnees.Journal
 import ma.inpt.presence.donnees.Stockage
 import ma.inpt.presence.protocole.Constantes
 import ma.inpt.presence.protocole.Trames
+import ma.inpt.presence.reseau.ApiClient
 import ma.inpt.presence.ui.Format
 
 /**
@@ -60,6 +62,7 @@ class PresenceService : Service() {
     private var scanner: BluetoothLeScanner? = null
     private var rechercheEnCours = false
     private var relance: Job? = null
+    private var suiviPlanning: Job? = null
     private var recepteurEnregistre = false
     private var pret = false
 
@@ -136,6 +139,7 @@ class PresenceService : Service() {
                 demarrerRecherche()
             }
         }
+        suiviPlanning = portee.launch { suivreChangements() }
         pret = true
     }
 
@@ -239,6 +243,22 @@ class PresenceService : Service() {
         file.trySend(Candidat(resultat.device))
     }
 
+    /** Relève les changements du planning (déplacement, annulation) et les notifie. */
+    private suspend fun suivreChangements() {
+        val moi = identite ?: return
+        val api = ApiClient(moi.serveur, moi.idAppareil)
+        while (true) {
+            try {
+                SuiviPlanning.verifier(this, api, stockage)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // Serveur injoignable ou téléphone verrouillé : nouvel essai au prochain passage.
+            }
+            delay(INTERVALLE_PLANNING_MS)
+        }
+    }
+
     private suspend fun consommer() {
         for (candidat in file) {
             val moi = identite ?: continue
@@ -261,6 +281,7 @@ class PresenceService : Service() {
     companion object {
         private const val RELANCE_RECHERCHE_MS = 25L * 60 * 1000
         private const val DELAI_REPRISE_MS = 10_000L
+        private const val INTERVALLE_PLANNING_MS = 60_000L
 
         /** Démarre le service si l'appareil est enrôlé et les permissions Bluetooth accordées. */
         fun demarrer(context: Context): Boolean {

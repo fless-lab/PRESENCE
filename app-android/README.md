@@ -57,6 +57,7 @@ app/src/main/java/ma/inpt/presence/
 | Écran | Contenu |
 |---|---|
 | Accueil | Bloc « Présence active » : dernière attestation, Bluetooth, batterie, service. Séance en cours de ses cours (sondage toutes les 30 s, écran visible) : cours, salle, heure de début, grille des fenêtres de 5 minutes, statut provisoire. |
+| Planning | Cours des prochains jours, groupés par jour, avec les annulations (rafraîchi toutes les minutes). |
 | Historique | Séances passées et statut. Un appui ouvre le détail. |
 | Détail de séance | Statut, salle, horaire, fenêtres. Le bouton « Reçu » télécharge le reçu, le vérifie sur le téléphone, affiche « Reçu vérifié » avec la racine, et permet de partager le fichier JSON. |
 | Profil | Identité, identifiant d'appareil, modèle, stockage de la clé, diagnostic, journal des 50 dernières tentatives, export du journal en CSV, déconnexion (supprime la clé après confirmation). |
@@ -68,8 +69,13 @@ app/src/main/java/ma/inpt/presence/
 | Cours | Bandeau de présence (sondage toutes les 10 s) : « En salle 204 depuis 9h02 » ou « Pas encore détecté dans une salle ». Liste des cours ; « Démarrer » n'est actif que si l'enseignant est attesté dans une salle. Une séance déjà ouverte se reprend en un appui. |
 | Séance active | Compteurs présents, en retard, à vérifier, non détectés ; liste des inscrits avec leur statut (sondage toutes les 10 s) ; Pause ou Reprendre ; Terminer, avec confirmation. |
 | Clôture | Cas « À vérifier » : Confirmer présent ou Marquer absent. Absents et non détectés : Valider à la main, avec un motif. Puis « Sceller la séance », qui affiche la racine et la transaction d'ancrage. |
+| Planning | Les cours qu'il enseigne, mêmes règles que pour l'étudiant. |
 | Historique | Séances récentes ; une séance ouverte mène au suivi, une séance close à la clôture. |
 | Profil | Identique à celui de l'étudiant. |
+
+## Changements de planning
+
+Le service de premier plan interroge `GET /moi/changements?apres=<id>` toutes les minutes. Chaque ajout, déplacement, annulation ou rétablissement des cours de la personne devient une notification (canal « alertes ») avec l'ancien et le nouvel horaire et le motif saisi par l'administration. Le dernier identifiant lu est gardé dans les préférences ; au premier passage l'historique existant est marqué comme lu sans notification. Le texte des notifications est composé dans `reseau/MessageChangement.kt`, sans dépendance Android, et testé sur la JVM. Il n'y a pas de notification poussée (Firebase) : si le service est arrêté, les changements sont notifiés à son redémarrage.
 
 ## Clé de l'appareil
 
