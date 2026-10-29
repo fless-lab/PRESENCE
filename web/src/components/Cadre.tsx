@@ -1,17 +1,45 @@
-import { CalendarClock, FileCheck2, LayoutGrid, Radio, ShieldCheck, Users } from 'lucide-react';
+import { CalendarClock, CalendarDays, FileCheck2, LayoutGrid, Radio, ShieldCheck, Users } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { ROLES } from '../lib/libelles';
+import { libellePromotion, usePromotion } from '../lib/promotion';
 import { Logo } from './Marque';
 
 const LIENS = [
   { vers: '/', libelle: 'Aperçu', icone: LayoutGrid, fin: true },
+  { vers: '/planning', libelle: 'Planning', icone: CalendarDays },
   { vers: '/seances', libelle: 'Séances', icone: CalendarClock },
   { vers: '/personnes', libelle: 'Personnes', icone: Users },
   { vers: '/salles', libelle: 'Salles et équipements', icone: Radio },
   { vers: '/audit', libelle: 'Audit', icone: ShieldCheck },
 ];
+
+function SelecteurPromotion() {
+  const { promotions, choisie, choisir } = usePromotion();
+  if (promotions.length === 0) return null;
+  const valeur = choisie ? promotions.findIndex((p) => p.filiere === choisie.filiere && p.niveau === choisie.niveau) : -1;
+  return (
+    <label className="champ promotion">
+      <span>Promotion</span>
+      <select
+        className="saisie"
+        value={valeur}
+        onChange={(e) => {
+          const i = Number(e.target.value);
+          choisir(i >= 0 ? { filiere: promotions[i].filiere, niveau: promotions[i].niveau } : null);
+        }}
+      >
+        <option value={-1}>Toutes</option>
+        {promotions.map((p, i) => (
+          <option key={`${p.filiere}-${p.niveau}`} value={i}>
+            {libellePromotion(p)}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
 
 export function Cadre({ children }: { children?: ReactNode }) {
   const { personne, deconnecter } = useAuth();
@@ -22,6 +50,7 @@ export function Cadre({ children }: { children?: ReactNode }) {
           <Logo />
           PRESENCE
         </Link>
+        <SelecteurPromotion />
         <nav className="nav" aria-label="Navigation principale">
           {LIENS.map(({ vers, libelle, icone: Icone, fin }) => (
             <NavLink key={vers} to={vers} end={fin}>

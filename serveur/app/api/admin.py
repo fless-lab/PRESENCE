@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from app import horloge
 from app.constantes import EQUIPEMENT_EN_LIGNE_MS
 from app.db import session
-from app.modeles import Cours, Equipement, Personne, Salle, Seance
+from app.modeles import Cours, Equipement, Inscription, Personne, Salle, Seance
 from app.securite.crypto import charger_cle_publique
 from app.securite.jetons import emettre_jeton, personnel, verifier_mot_de_passe
 from app.services import evenements, personnes, planning, seances
@@ -163,6 +163,43 @@ def filieres(_: Personne = Depends(LECTURE), db: Session = Depends(session)) -> 
         e = sortie.setdefault((f, n), {"filiere": f, "niveau": n, "etudiants": 0, "cours": 0})
         e["cours"] = nb
     return {"filieres": sorted(sortie.values(), key=lambda e: (e["filiere"], e["niveau"]))}
+
+
+@router.get("/admin/cours")
+def liste_cours(
+    filiere: str | None = None,
+    niveau: str | None = None,
+    _: Personne = Depends(LECTURE),
+    db: Session = Depends(session),
+) -> dict:
+    q = select(Cours).order_by(Cours.code)
+    if filiere:
+        q = q.where(Cours.filiere == filiere)
+    if niveau:
+        q = q.where(Cours.niveau == niveau.upper())
+    sortie = []
+    for c in db.scalars(q):
+        nb = db.scalar(
+            select(func.count()).select_from(Inscription).where(Inscription.cours_id == c.id)
+        )
+        sortie.append(
+            {
+                "code": c.code,
+                "intitule": c.intitule,
+                "groupe": c.groupe,
+                "filiere": c.filiere,
+                "niveau": c.niveau,
+                "inscrits": nb or 0,
+                "enseignant": {
+                    "matricule": c.enseignant.matricule,
+                    "nom": c.enseignant.nom,
+                    "prenom": c.enseignant.prenom,
+                }
+                if c.enseignant
+                else None,
+            }
+        )
+    return {"cours": sortie}
 
 
 @router.get("/admin/codes.csv")

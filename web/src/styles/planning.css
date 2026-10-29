@@ -1,0 +1,80 @@
+.semaine-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  margin-bottom: var(--e4);
+}
+
+.semaine-libelle {
+  min-width: 140px;
+  text-align: center;
+  font-weight: 500;
+  font-feature-settings: 'tnum';
+}
+
+.semaine-nav .lien-discret {
+  margin-left: var(--e2);
+}
+
+.jour {
+  margin-bottom: var(--e5);
+}
+
+.jour-titre {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--texte-2);
+  margin: 0 0 var(--e2);
+}
+
+.creneau-heure {
+  width: 130px;
+  white-space: nowrap;
+}
+
+.creneau-cours {
+  font-weight: 500;
+}
+
+.tableau tr.annule td {
+  color: var(--texte-3);
+}
+
+.tableau tr.annule .creneau-cours,
+.tableau tr.annule .creneau-heure {
+  text-decoration: line-through;
+}
+
+.actions-ligne {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.actions-ligne .bouton + .bouton {
+  margin-left: var(--e2);
+}
+
+.changements {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.changements li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e4);
+  padding: var(--e3) 0;
+  border-top: 1px solid var(--trait);
+}
+
+.changements li > span {
+  flex: none;
+  white-space: nowrap;
+}
+
+.dialogue input[type='datetime-local'] {
+  padding: 0 6px;
+  font-size: 13px;
+  min-width: 0;
+}

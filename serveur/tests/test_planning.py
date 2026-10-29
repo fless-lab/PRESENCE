@@ -229,6 +229,10 @@ def test_filtres_filiere_niveau_et_codes(client, horloge_test):
         )
         == 3
     )  # 2 étudiants + P001
+    cours = client.get("/admin/cours?niveau=INE3", headers=adm).json()["cours"]
+    assert [(c["code"], c["inscrits"], c["enseignant"]["matricule"]) for c in cours] == [
+        ("SECRES", 2, "P001")
+    ]
     t0 = 1_800_000_000_000
     _importer(
         client,

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import type { EtatSeance } from '../api/types';
@@ -8,12 +8,15 @@ import { Erreur, LignesSquelette, Vide } from '../components/Etats';
 import { PuceEtat } from '../components/Puces';
 import { dateHeure, duree, nomComplet } from '../lib/format';
 import { ETATS } from '../lib/libelles';
+import { usePromotion } from '../lib/promotion';
 import { useRessource } from '../lib/useRessource';
 
 const FILTRES: (EtatSeance | 'TOUTES')[] = ['TOUTES', 'ACTIVE', 'PAUSE', 'CLOTUREE', 'SCELLEE'];
 
 export function Seances() {
-  const { donnees, erreur, chargement } = useRessource(api.seances, 30_000);
+  const { choisie } = usePromotion();
+  const charger = useCallback(() => api.seances(choisie), [choisie]);
+  const { donnees, erreur, chargement } = useRessource(charger, 30_000);
   const [filtre, setFiltre] = useState<EtatSeance | 'TOUTES'>('TOUTES');
   const naviguer = useNavigate();
 

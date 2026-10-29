@@ -218,3 +218,7 @@
     padding: var(--e5) var(--e4) var(--e7);
   }
 }
+
+.promotion {
+  margin: 0 var(--e2) var(--e4);
+}

@@ -167,6 +167,9 @@ export interface AppareilPersonne {
 export interface PersonneAdmin extends Personne {
   appareil: AppareilPersonne | null;
   code_en_attente: string | null;
+  code_expire_ms: number | null;
+  filiere: string;
+  niveau: string;
 }
 
 export interface ListePersonnes {
@@ -241,4 +244,92 @@ export interface AncrageRegistre {
   corrections: CorrectionAncree[];
   transaction: string | null;
   registre: Registre;
+}
+
+/* Filière et niveau (ex. SESNUM, INE3) servent de filtre dans tout le tableau de bord. */
+export interface Promotion {
+  filiere: string;
+  niveau: string;
+}
+
+/* GET /admin/filieres */
+export interface FiliereNiveau extends Promotion {
+  etudiants: number;
+  cours: number;
+}
+
+/* GET /admin/cours */
+export interface CoursAdmin {
+  code: string;
+  intitule: string;
+  groupe: string;
+  filiere: string;
+  niveau: string;
+  inscrits: number;
+  enseignant: RefEnseignant | null;
+}
+
+export type EtatCreneau = 'PREVU' | 'ANNULE';
+export type TypeChangement = 'CREE' | 'DEPLACE' | 'ANNULE' | 'RETABLI';
+
+/* GET /admin/planning */
+export interface Creneau {
+  id: number;
+  ref: string | null;
+  cours: RefCours & { groupe: string; filiere: string; niveau: string };
+  salle: RefSalle;
+  enseignant: RefEnseignant | null;
+  debut_ms: number;
+  fin_ms: number;
+  etat: EtatCreneau;
+  origine: 'IMPORT' | 'LOCAL';
+  maj_ms: number;
+}
+
+export interface ValeursCreneau {
+  debut_ms: number;
+  fin_ms: number;
+  salle: number;
+  enseignant: string | null;
+  etat: EtatCreneau;
+}
+
+/* GET /admin/planning/changements */
+export interface ChangementPlanning {
+  id: number;
+  creneau: number;
+  type: TypeChangement;
+  cours: RefCours;
+  avant: ValeursCreneau | null;
+  apres: ValeursCreneau;
+  motif: string;
+  auteur: string;
+  origine: 'IMPORT' | 'LOCAL';
+  horodatage: number;
+}
+
+/* POST /admin/planning/import */
+export interface ImportPlanningResultat {
+  crees: number;
+  modifies: number;
+  inchanges: number;
+  ecarts: { ref: string }[];
+  non_retrouves: string[];
+  erreurs: { ligne: number; message: string }[];
+}
+
+/* POST /admin/planning, PATCH /admin/planning/{id} (dates en « 2026-11-03T09:00 », fuseau de l'école) */
+export interface CreneauDemande {
+  cours: string;
+  salle: number;
+  debut: string;
+  fin: string;
+  motif?: string;
+}
+
+export interface DeplacementDemande {
+  debut: string;
+  fin: string;
+  salle: number;
+  motif: string;
 }

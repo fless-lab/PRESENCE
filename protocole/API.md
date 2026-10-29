@@ -163,6 +163,7 @@ Réponse : `{acceptes, rejetes: [{index, raison}]}`.
 | `GET /admin/apercu` | Séances actives, équipements, chiffres du jour |
 | `POST /admin/import` (CSV) | Colonnes : `matricule,nom,prenom,role,cours_code,cours_intitule,groupe`, et facultatives `filiere,niveau` |
 | `GET /admin/personnes?filiere=&niveau=` | Personnes, appareil, code d'enrôlement en attente et son expiration |
+| `GET /admin/cours?filiere=&niveau=` | Cours, effectif et enseignant |
 | `GET /admin/filieres` | Filières et niveaux connus, avec effectifs |
 | `GET /admin/codes.csv?filiere=&niveau=` | Codes en attente, à remettre par le circuit de l'école |
 | `POST /admin/personnes/{matricule}/code` | Nouveau code, révoque l'appareil actuel |

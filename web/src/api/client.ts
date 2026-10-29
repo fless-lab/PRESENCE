@@ -5,8 +5,16 @@ import type {
   Audit,
   AncrageRegistre,
   CleServeur,
+  ChangementPlanning,
   ConnexionReponse,
   CorrectionDemande,
+  CoursAdmin,
+  Creneau,
+  CreneauDemande,
+  DeplacementDemande,
+  FiliereNiveau,
+  ImportPlanningResultat,
+  Promotion,
   EquipementDemande,
   Equipement,
   EvenementJournal,
@@ -140,17 +148,24 @@ function liste<T>(reponse: unknown, cle: string): T[] {
 
 const enc = encodeURIComponent;
 
+/** Paramètres de requête pour filtrer par filière et niveau (vide si aucune promotion choisie). */
+function filtre(p?: Promotion | null, autres: Record<string, string | undefined> = {}): string {
+  const q = new URLSearchParams();
+  if (p?.filiere) q.set('filiere', p.filiere);
+  if (p?.niveau) q.set('niveau', p.niveau);
+  for (const [k, v] of Object.entries(autres)) if (v) q.set(k, v);
+  const t = q.toString();
+  return t ? `?${t}` : '';
+}
+
 export const api = {
   connexion: (matricule: string, mot_de_passe: string) =>
     envoyer<ConnexionReponse>('/auth/connexion', { matricule, mot_de_passe }, false),
 
   apercu: () => json<Apercu>('/admin/apercu'),
 
-  seances: async (etat?: EtatSeance) =>
-    liste<SeanceResume>(
-      await json<unknown>('/admin/seances' + (etat ? `?etat=${enc(etat)}` : '')),
-      'seances',
-    ),
+  seances: async (promotion?: Promotion | null, etat?: EtatSeance) =>
+    liste<SeanceResume>(await json<unknown>('/admin/seances' + filtre(promotion, { etat })), 'seances'),
   seance: (id: string) => json<SeanceDetail>(`/admin/seances/${enc(id)}`),
   evenements: async (id: string) =>
     liste<EvenementJournal>(await json<unknown>(`/admin/seances/${enc(id)}/evenements`), 'evenements'),
@@ -161,7 +176,15 @@ export const api = {
     return r.blob();
   },
 
-  personnes: async () => liste<PersonneAdmin>(await json<unknown>('/admin/personnes'), 'personnes'),
+  personnes: async (promotion?: Promotion | null) =>
+    liste<PersonneAdmin>(await json<unknown>('/admin/personnes' + filtre(promotion)), 'personnes'),
+  filieres: async () => liste<FiliereNiveau>(await json<unknown>('/admin/filieres'), 'filieres'),
+  cours: async (promotion?: Promotion | null) =>
+    liste<CoursAdmin>(await json<unknown>('/admin/cours' + filtre(promotion)), 'cours'),
+  async exporterCodes(promotion?: Promotion | null): Promise<Blob> {
+    const r = await requete('/admin/codes.csv' + filtre(promotion));
+    return r.blob();
+  },
   importer: (fichier: File) => {
     const corps = new FormData();
     corps.append('fichier', fichier);
@@ -169,6 +192,34 @@ export const api = {
   },
   nouveauCode: (matricule: string) =>
     envoyer<NouveauCode>(`/admin/personnes/${enc(matricule)}/code`, {}),
+
+  planning: async (promotion?: Promotion | null, du?: number, au?: number) =>
+    liste<Creneau>(
+      await json<unknown>(
+        '/admin/planning' + filtre(promotion, { du: du?.toString(), au: au?.toString() }),
+      ),
+      'creneaux',
+    ),
+  changementsPlanning: async (promotion?: Promotion | null) =>
+    liste<ChangementPlanning>(
+      await json<unknown>('/admin/planning/changements' + filtre(promotion)),
+      'changements',
+    ),
+  importerPlanning: (fichier: File) => {
+    const corps = new FormData();
+    corps.append('fichier', fichier);
+    return json<ImportPlanningResultat>('/admin/planning/import', { method: 'POST', body: corps });
+  },
+  ajouterCreneau: (c: CreneauDemande) => envoyer<Creneau>('/admin/planning', c),
+  deplacerCreneau: (id: number, c: DeplacementDemande) =>
+    json<Creneau>(`/admin/planning/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(c),
+    }),
+  annulerCreneau: (id: number, motif: string) =>
+    envoyer<Creneau>(`/admin/planning/${id}/annulation`, { motif }),
+  retablirCreneau: (id: number) => envoyer<Creneau>(`/admin/planning/${id}/retablissement`, {}),
 
   salles: async () => liste<RefSalle>(await json<unknown>('/admin/salles'), 'salles'),
   ajouterSalle: (salle: RefSalle) => envoyer<unknown>('/admin/salles', salle),

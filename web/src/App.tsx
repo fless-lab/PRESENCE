@@ -5,6 +5,7 @@ import { Apercu } from './pages/Apercu';
 import { Audit } from './pages/Audit';
 import { Connexion } from './pages/Connexion';
 import { Personnes } from './pages/Personnes';
+import { Planning } from './pages/Planning';
 import { Salles } from './pages/Salles';
 import { SeanceDetail } from './pages/SeanceDetail';
 import { Seances } from './pages/Seances';
@@ -34,6 +35,7 @@ export function App() {
         }
       >
         <Route index element={<Apercu />} />
+        <Route path="planning" element={<Planning />} />
         <Route path="seances" element={<Seances />} />
         <Route path="seances/:id" element={<SeanceDetail />} />
         <Route path="personnes" element={<Personnes />} />

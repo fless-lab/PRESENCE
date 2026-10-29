@@ -1,18 +1,21 @@
-import { Upload } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { Download, Upload } from 'lucide-react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { api } from '../api/client';
 import type { ImportResultat, PersonneAdmin } from '../api/types';
 import { BoutonCopie } from '../components/Copie';
 import { Dialogue } from '../components/Dialogue';
 import { EnTete } from '../components/EnTete';
 import { Erreur, LignesSquelette, Vide } from '../components/Etats';
-import { nomComplet } from '../lib/format';
+import { date, nomComplet } from '../lib/format';
 import { ATTESTATIONS, ROLES } from '../lib/libelles';
+import { usePromotion } from '../lib/promotion';
 import { useRessource } from '../lib/useRessource';
 import { messageErreur } from '../verif/recu';
 
 export function Personnes() {
-  const { donnees, erreur, chargement, recharger } = useRessource(api.personnes);
+  const { choisie } = usePromotion();
+  const charger = useCallback(() => api.personnes(choisie), [choisie]);
+  const { donnees, erreur, chargement, recharger } = useRessource(charger);
   const [recherche, setRecherche] = useState('');
   const [resultat, setResultat] = useState<ImportResultat | null>(null);
   const [erreurAction, setErreurAction] = useState<string | null>(null);
@@ -47,6 +50,21 @@ export function Personnes() {
     }
   }
 
+  async function exporterCodes() {
+    setErreurAction(null);
+    try {
+      const blob = await api.exporterCodes(choisie);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'codes-enrolement.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setErreurAction(`Export impossible : ${messageErreur(e)}`);
+    }
+  }
+
   async function nouveauCode(p: PersonneAdmin) {
     setErreurAction(null);
     try {
@@ -77,6 +95,10 @@ export function Personnes() {
                 if (f) void importer(f);
               }}
             />
+            <button type="button" className="bouton" onClick={() => void exporterCodes()}>
+              <Download size={15} />
+              Exporter les codes
+            </button>
             <button
               type="button"
               className="bouton bouton-primaire"
@@ -94,7 +116,8 @@ export function Personnes() {
       {resultat && <ResumeImport resultat={resultat} onFermer={() => setResultat(null)} />}
 
       <p className="secondaire" style={{ fontSize: 13, marginBottom: 16 }}>
-        Colonnes attendues : <span className="mono">matricule,nom,prenom,role,cours_code,cours_intitule,groupe</span>
+        Colonnes attendues : <span className="mono">matricule,nom,prenom,role,cours_code,cours_intitule,groupe,filiere,niveau</span>
+        {' '}(les deux dernières sont facultatives). Les codes d'enrôlement sont remis par le circuit de l'école.
       </p>
 
       <div style={{ maxWidth: 320, marginBottom: 16 }}>
@@ -116,6 +139,7 @@ export function Personnes() {
               <th>Nom</th>
               <th>Prénom</th>
               <th>Rôle</th>
+              <th>Promotion</th>
               <th>Appareil</th>
               <th>Code d'enrôlement</th>
               <th>
@@ -124,13 +148,14 @@ export function Personnes() {
             </tr>
           </thead>
           <tbody>
-            {chargement && !donnees && <LignesSquelette colonnes={7} lignes={8} />}
+            {chargement && !donnees && <LignesSquelette colonnes={8} lignes={8} />}
             {lignes.map((p) => (
               <tr key={p.matricule}>
                 <td className="tabulaire">{p.matricule}</td>
                 <td>{p.nom}</td>
                 <td>{p.prenom}</td>
                 <td className="secondaire">{ROLES[p.role] ?? p.role}</td>
+                <td className="secondaire">{[p.filiere, p.niveau].filter(Boolean).join(' · ') || '–'}</td>
                 <td>
                   <Appareil p={p} />
                 </td>
@@ -139,6 +164,11 @@ export function Personnes() {
                     <span className="empreinte" style={{ color: 'var(--texte)' }}>
                       <span className="mono">{p.code_en_attente}</span>
                       <BoutonCopie texte={p.code_en_attente} libelle="Copier le code" />
+                      {p.code_expire_ms && (
+                        <span className="tertiaire" style={{ fontSize: 12.5 }}>
+                          jusqu'au {date(p.code_expire_ms)}
+                        </span>
+                      )}
                     </span>
                   ) : (
                     <span className="tertiaire">–</span>
