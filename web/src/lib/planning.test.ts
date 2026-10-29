@@ -45,7 +45,7 @@ describe('semaines et jours', () => {
       creneau(2, local(2026, 11, 3, 9)),
     ]);
     expect(jours.map((j) => j.debut)).toEqual([local(2026, 11, 3), local(2026, 11, 5)]);
-    expect(jours[0].creneaux.map((c) => c.id)).toEqual([2, 1]);
+    expect(jours[0]?.creneaux.map((c) => c.id)).toEqual([2, 1]);
   });
 });
 

@@ -27,7 +27,8 @@ function SelecteurPromotion() {
         value={valeur}
         onChange={(e) => {
           const i = Number(e.target.value);
-          choisir(i >= 0 ? { filiere: promotions[i].filiere, niveau: promotions[i].niveau } : null);
+          const p = promotions[i];
+          choisir(p ? { filiere: p.filiere, niveau: p.niveau } : null);
         }}
       >
         <option value={-1}>Toutes</option>

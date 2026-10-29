@@ -39,7 +39,7 @@ export function FournisseurPromotion({ children }: { children: ReactNode }) {
         const connues = l.filter((p) => p.filiere || p.niveau);
         setPromotions(connues);
         // Une seule promotion connue : on la retient d'office.
-        setChoisie((c) => (c === null && connues.length === 1 ? connues[0] : c));
+        setChoisie((c) => (c === null && connues.length === 1 ? (connues[0] ?? null) : c));
       })
       .catch(() => {});
     return () => {
