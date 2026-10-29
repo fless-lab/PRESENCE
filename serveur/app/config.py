@@ -28,6 +28,12 @@ class Config:
     attestation: str = field(
         default_factory=lambda: os.environ.get("PRESENCE_ATTESTATION", "souple")
     )
+    fuseau: str = field(
+        default_factory=lambda: os.environ.get("PRESENCE_FUSEAU", "Africa/Casablanca")
+    )
+    code_validite_jours: int = field(
+        default_factory=lambda: int(os.environ.get("PRESENCE_CODE_VALIDITE_JOURS", "14"))
+    )
     cors: list[str] = field(
         default_factory=lambda: _liste(os.environ.get("PRESENCE_CORS", "http://localhost:5173"))
     )

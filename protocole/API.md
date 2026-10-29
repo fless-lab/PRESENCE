@@ -105,6 +105,8 @@ Réponse : `{id_appareil, personne: {matricule, nom, prenom, role}, attestation}
 | `GET /moi/seance-courante` | étudiant | Séance active d'un de ses cours, fenêtres, statut provisoire, ou `null` |
 | `GET /moi/historique` | tous | Séances passées et statut |
 | `GET /moi/recus/{seance}` | tous | Reçu de présence (section 9) |
+| `GET /moi/planning?du=&au=` | tous | Créneaux des cours de la personne (par défaut de 6 h avant à 14 jours après) |
+| `GET /moi/changements?apres=<id>` | tous | Ajouts, déplacements, annulations et rétablissements depuis le dernier `id` lu |
 | `GET /enseignant/cours` | enseignant | Cours qu'il enseigne |
 | `GET /enseignant/presence` | enseignant | `{salle, nom_salle, depuis_ms}` si attesté dans une salle depuis moins de 3 min, sinon `null` |
 | `GET /enseignant/seances` | enseignant | Ses séances récentes |
@@ -159,16 +161,24 @@ Réponse : `{acceptes, rejetes: [{index, raison}]}`.
 |---|---|
 | `POST /auth/connexion` `{matricule, mot_de_passe}` | Renvoie `{jeton, personne}` |
 | `GET /admin/apercu` | Séances actives, équipements, chiffres du jour |
-| `POST /admin/import` (CSV) | Colonnes : `matricule,nom,prenom,role,cours_code,cours_intitule,groupe` |
-| `GET /admin/personnes` | Personnes, appareil, code d'enrôlement en attente |
+| `POST /admin/import` (CSV) | Colonnes : `matricule,nom,prenom,role,cours_code,cours_intitule,groupe`, et facultatives `filiere,niveau` |
+| `GET /admin/personnes?filiere=&niveau=` | Personnes, appareil, code d'enrôlement en attente et son expiration |
+| `GET /admin/filieres` | Filières et niveaux connus, avec effectifs |
+| `GET /admin/codes.csv?filiere=&niveau=` | Codes en attente, à remettre par le circuit de l'école |
 | `POST /admin/personnes/{matricule}/code` | Nouveau code, révoque l'appareil actuel |
 | `GET /admin/salles`, `POST /admin/salles` | Salles |
 | `GET /admin/equipements`, `POST /admin/equipements` | Observateurs : `{nom, salle, type, cle_publique}` |
-| `GET /admin/seances` | Liste des séances |
+| `GET /admin/seances?etat=&filiere=&niveau=` | Liste des séances |
 | `GET /admin/seances/{id}` | Détail : statuts, fenêtres, racine, ancrage |
 | `GET /admin/seances/{id}/evenements` | Journal complet |
 | `GET /admin/seances/{id}/export.csv` | Feuille de présence |
 | `POST /admin/seances/{id}/corrections` `{matricule, statut, motif}` | Correction scellée et ré-ancrée |
+| `POST /admin/planning/import` (CSV) | Colonnes : `ref,cours_code,salle,debut,fin`, facultatives `enseignant,etat`. Dates `2026-11-03T09:00` (fuseau de l'école) ou millisecondes. Rapport : `crees, modifies, inchanges, ecarts, non_retrouves, erreurs` |
+| `GET /admin/planning?filiere=&niveau=&du=&au=` | Créneaux |
+| `POST /admin/planning` `{cours, salle, debut, fin, enseignant?, motif?}` | Ajoute un créneau |
+| `PATCH /admin/planning/{id}` `{debut?, fin?, salle?, enseignant?, motif}` | Déplace ; le motif est obligatoire. Sans `fin`, la durée est conservée |
+| `POST /admin/planning/{id}/annulation` `{motif}`, `POST .../retablissement` | Annule, rétablit |
+| `GET /admin/planning/changements` | Journal des changements |
 | `GET /audit` | Pour chaque séance scellée : racine recalculée, racine ancrée, conformité |
 
 ## 9. Reçu de présence

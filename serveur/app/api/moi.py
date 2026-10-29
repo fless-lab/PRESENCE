@@ -6,7 +6,7 @@ from app.db import session
 from app.etat import cle_serveur
 from app.modeles import Inscription, Seance
 from app.securite.requetes import Signataire, telephone
-from app.services import recus, seances
+from app.services import planning, recus, seances
 
 router = APIRouter(prefix="/moi", tags=["téléphone"])
 
@@ -82,3 +82,24 @@ def recu(seance_id: str, s: Signataire = Depends(telephone), db: Session = Depen
     if s.personne is None:
         raise HTTPException(403, "Accès refusé")
     return recus.construire(db, seance, s.personne, cle_serveur())
+
+
+@router.get("/planning")
+def mon_planning(
+    du: int | None = None,
+    au: int | None = None,
+    s: Signataire = Depends(telephone),
+    db: Session = Depends(session),
+) -> dict:
+    """Prochains cours, à jour avec le site de l'école et les modifications de la scolarité."""
+    assert s.personne is not None
+    return {"creneaux": planning.pour_personne(db, s.personne, du, au)}
+
+
+@router.get("/changements")
+def mes_changements(
+    apres: int = 0, s: Signataire = Depends(telephone), db: Session = Depends(session)
+) -> dict:
+    """Déplacements, annulations et ajouts depuis le dernier changement lu (`apres`)."""
+    assert s.personne is not None
+    return {"changements": planning.changements_pour(db, s.personne, apres)}

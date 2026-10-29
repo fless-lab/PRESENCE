@@ -1,19 +1,20 @@
 import csv
 import io
 from datetime import UTC, datetime
+from typing import Any
 
 from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile
 from fastapi.responses import Response
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app import horloge
 from app.constantes import EQUIPEMENT_EN_LIGNE_MS
 from app.db import session
-from app.modeles import Equipement, Personne, Salle, Seance
+from app.modeles import Cours, Equipement, Personne, Salle, Seance
 from app.securite.crypto import charger_cle_publique
 from app.securite.jetons import emettre_jeton, personnel, verifier_mot_de_passe
-from app.services import evenements, personnes, seances
+from app.services import evenements, personnes, planning, seances
 
 router = APIRouter(tags=["personnel"])
 
@@ -98,9 +99,19 @@ async def importer(
 
 
 @router.get("/admin/personnes")
-def liste_personnes(_: Personne = Depends(LECTURE), db: Session = Depends(session)) -> dict:
+def liste_personnes(
+    filiere: str | None = None,
+    niveau: str | None = None,
+    _: Personne = Depends(LECTURE),
+    db: Session = Depends(session),
+) -> dict:
     sortie = []
-    for p in db.scalars(select(Personne).order_by(Personne.role, Personne.nom, Personne.prenom)):
+    q = select(Personne).order_by(Personne.role, Personne.nom, Personne.prenom)
+    if filiere:
+        q = q.where(Personne.filiere == filiere)
+    if niveau:
+        q = q.where(Personne.niveau == niveau.upper())
+    for p in db.scalars(q):
         actif = next((a for a in p.appareils if a.actif), None)
         sortie.append(
             {
@@ -118,6 +129,9 @@ def liste_personnes(_: Personne = Depends(LECTURE), db: Session = Depends(sessio
                 if actif
                 else None,
                 "code_en_attente": p.code_enrolement,
+                "code_expire_ms": p.code_expire_ms if p.code_enrolement else None,
+                "filiere": p.filiere,
+                "niveau": p.niveau,
             }
         )
     return {"personnes": sortie}
@@ -129,6 +143,56 @@ def code(matricule: str, _: Personne = Depends(GESTION), db: Session = Depends(s
     if p is None or p.role not in ("ETUDIANT", "ENSEIGNANT"):
         raise HTTPException(404, "Personne introuvable")
     return {"matricule": p.matricule, "code": personnes.attribuer_code(db, p)}
+
+
+@router.get("/admin/filieres")
+def filieres(_: Personne = Depends(LECTURE), db: Session = Depends(session)) -> dict:
+    """Filières et niveaux connus, avec leur effectif, pour les filtres du tableau de bord."""
+    sortie: dict[tuple[str, str], dict] = {}
+    for f, n, nb in db.execute(
+        select(Personne.filiere, Personne.niveau, func.count(Personne.id))
+        .where(Personne.role == "ETUDIANT")
+        .group_by(Personne.filiere, Personne.niveau)
+    ):
+        sortie[(f, n)] = {"filiere": f, "niveau": n, "etudiants": nb, "cours": 0}
+    for f, n, nb in db.execute(
+        select(Cours.filiere, Cours.niveau, func.count(Cours.id)).group_by(
+            Cours.filiere, Cours.niveau
+        )
+    ):
+        e = sortie.setdefault((f, n), {"filiere": f, "niveau": n, "etudiants": 0, "cours": 0})
+        e["cours"] = nb
+    return {"filieres": sorted(sortie.values(), key=lambda e: (e["filiere"], e["niveau"]))}
+
+
+@router.get("/admin/codes.csv")
+def codes_en_attente(
+    filiere: str | None = None,
+    niveau: str | None = None,
+    _: Personne = Depends(GESTION),
+    db: Session = Depends(session),
+):
+    """Codes d'enrôlement à transmettre par le circuit de l'école (comme les accès Moodle)."""
+    tampon = io.StringIO()
+    w = csv.writer(tampon)
+    w.writerow(["matricule", "nom", "prenom", "filiere", "niveau", "code", "expire"])
+    q = select(Personne).where(Personne.code_enrolement.is_not(None)).order_by(Personne.matricule)
+    if filiere:
+        q = q.where(Personne.filiere == filiere)
+    if niveau:
+        q = q.where(Personne.niveau == niveau.upper())
+    for p in db.scalars(q):
+        expire = (
+            datetime.fromtimestamp(p.code_expire_ms / 1000, tz=UTC).strftime("%Y-%m-%d")
+            if p.code_expire_ms
+            else ""
+        )
+        w.writerow([p.matricule, p.nom, p.prenom, p.filiere, p.niveau, p.code_enrolement, expire])
+    return Response(
+        tampon.getvalue(),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="codes-enrolement.csv"'},
+    )
 
 
 @router.get("/admin/salles")
@@ -194,11 +258,20 @@ def ajouter_equipement(
 
 @router.get("/admin/seances")
 def liste_seances(
-    etat: str | None = None, _: Personne = Depends(LECTURE), db: Session = Depends(session)
+    etat: str | None = None,
+    filiere: str | None = None,
+    niveau: str | None = None,
+    _: Personne = Depends(LECTURE),
+    db: Session = Depends(session),
 ) -> dict:
-    q = select(Seance).order_by(Seance.debut_ms.desc()).limit(300)
+    q = select(Seance).join(Cours, Cours.id == Seance.cours_id)
     if etat:
         q = q.where(Seance.etat == etat)
+    if filiere:
+        q = q.where(Cours.filiere == filiere)
+    if niveau:
+        q = q.where(Cours.niveau == niveau.upper())
+    q = q.order_by(Seance.debut_ms.desc()).limit(300)
     return {"seances": [seances.resume(db, s) for s in db.scalars(q)]}
 
 
@@ -289,6 +362,105 @@ def correction(
 def sceller(seance_id: str, _: Personne = Depends(GESTION), db: Session = Depends(session)) -> dict:
     seance = seances.sceller(db, seances.obtenir(db, seance_id))
     return {"racine": seance.racine, "ancrage": seance.ancrage}
+
+
+# --- planning ---------------------------------------------------------------------------------
+
+
+@router.post("/admin/planning/import")
+async def importer_planning(
+    fichier: UploadFile = File(...),
+    auteur: Personne = Depends(GESTION),
+    db: Session = Depends(session),
+) -> dict:
+    contenu = (await fichier.read()).decode("utf-8", errors="replace")
+    return planning.importer_csv(db, contenu, auteur.matricule)
+
+
+@router.get("/admin/planning")
+def liste_planning(
+    filiere: str | None = None,
+    niveau: str | None = None,
+    du: str | None = None,
+    au: str | None = None,
+    _: Personne = Depends(LECTURE),
+    db: Session = Depends(session),
+) -> dict:
+    try:
+        du_ms = planning.instant(du) if du else None
+        au_ms = planning.instant(au) if au else None
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    return {
+        "maintenant_ms": horloge.maintenant_ms(),
+        "creneaux": planning.lister(db, filiere=filiere, niveau=niveau, du_ms=du_ms, au_ms=au_ms),
+    }
+
+
+@router.get("/admin/planning/changements")
+def journal_planning(
+    filiere: str | None = None,
+    niveau: str | None = None,
+    _: Personne = Depends(LECTURE),
+    db: Session = Depends(session),
+) -> dict:
+    return {"changements": planning.journal(db, filiere=filiere, niveau=niveau)}
+
+
+@router.post("/admin/planning")
+def creer_creneau(
+    cours: str = Body(...),
+    salle: Any = Body(...),
+    debut: Any = Body(...),
+    fin: Any = Body(...),
+    enseignant: str | None = Body(None),
+    motif: str = Body(""),
+    auteur: Personne = Depends(GESTION),
+    db: Session = Depends(session),
+) -> dict:
+    c = planning.creer_local(
+        db, auteur, cours_code=cours, salle=salle, debut=debut, fin=fin,
+        enseignant=enseignant, motif=motif,
+    )  # fmt: skip
+    return planning.vue(c)
+
+
+@router.patch("/admin/planning/{creneau_id}")
+def deplacer_creneau(
+    creneau_id: int,
+    debut: Any = Body(None),
+    fin: Any = Body(None),
+    salle: Any = Body(None),
+    enseignant: str | None = Body(None),
+    motif: str = Body(""),
+    auteur: Personne = Depends(GESTION),
+    db: Session = Depends(session),
+) -> dict:
+    c = planning.deplacer(
+        db, auteur, creneau_id, debut=debut, fin=fin, salle=salle, enseignant=enseignant,
+        motif=motif,
+    )  # fmt: skip
+    return planning.vue(c)
+
+
+@router.post("/admin/planning/{creneau_id}/annulation")
+def annuler_creneau(
+    creneau_id: int,
+    motif: str = Body(..., embed=True),
+    auteur: Personne = Depends(GESTION),
+    db: Session = Depends(session),
+) -> dict:
+    return planning.vue(planning.annuler(db, auteur, creneau_id, motif))
+
+
+@router.post("/admin/planning/{creneau_id}/retablissement")
+def retablir_creneau(
+    creneau_id: int,
+    motif: str = Body("", embed=True),
+    auteur: Personne = Depends(GESTION),
+    db: Session = Depends(session),
+) -> dict:
+    return planning.vue(planning.retablir(db, auteur, creneau_id, motif))
 
 
 @router.get("/audit")

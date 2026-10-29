@@ -20,11 +20,19 @@ from app.securite.crypto import charger_cle_publique, de_b64, id_appareil
 ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 COLONNES = ("matricule", "nom", "prenom", "role", "cours_code", "cours_intitule", "groupe")
 DUREE_DEFI_MS = 5 * 60 * 1000
+JOUR_MS = 86_400_000
 
 
 def nouveau_code() -> str:
     c = "".join(secrets.choice(ALPHABET) for _ in range(6))
     return f"{c[:3]}-{c[3:]}"
+
+
+def poser_code(p: Personne) -> str:
+    """Pose un code neuf, valable `code_validite_jours` jours."""
+    p.code_enrolement = nouveau_code()
+    p.code_expire_ms = horloge.maintenant_ms() + config.code_validite_jours * JOUR_MS
+    return p.code_enrolement
 
 
 def attribuer_code(db: Session, p: Personne) -> str:
@@ -33,8 +41,7 @@ def attribuer_code(db: Session, p: Personne) -> str:
     for a in p.appareils:
         if a.actif:
             a.actif, a.revoque_ms = False, maintenant
-    p.code_enrolement = nouveau_code()
-    return p.code_enrolement
+    return poser_code(p)
 
 
 def importer_csv(db: Session, contenu: str) -> dict:
@@ -66,17 +73,21 @@ def importer_csv(db: Session, contenu: str) -> dict:
                 nom=ligne.get("nom", ""),
                 prenom=ligne.get("prenom", ""),
                 role=role,
+                filiere=ligne.get("filiere", ""),
+                niveau=ligne.get("niveau", "").upper(),
             )
             db.add(p)
             db.flush()
             rapport["personnes_creees"] += 1
         elif matricule not in vus:
             p.nom, p.prenom, p.role = ligne.get("nom", p.nom), ligne.get("prenom", p.prenom), role
+            p.filiere = ligne.get("filiere") or p.filiere
+            p.niveau = (ligne.get("niveau") or p.niveau).upper()
             rapport["personnes_mises_a_jour"] += 1
         if matricule not in vus and role in ("ETUDIANT", "ENSEIGNANT"):
             a_appareil = any(a.actif for a in p.appareils)
             if not a_appareil and not p.code_enrolement:
-                p.code_enrolement = nouveau_code()
+                poser_code(p)
                 rapport["codes"].append(
                     {
                         "matricule": p.matricule,
@@ -96,6 +107,8 @@ def importer_csv(db: Session, contenu: str) -> dict:
                 code=code_cours,
                 intitule=ligne.get("cours_intitule") or code_cours,
                 groupe=ligne.get("groupe", ""),
+                filiere=ligne.get("filiere", ""),
+                niveau=ligne.get("niveau", "").upper(),
             )
             db.add(cours)
             db.flush()
@@ -129,6 +142,8 @@ def enroler(db: Session, demande: dict) -> dict:
         raise HTTPException(403, "Aucun enrôlement en attente pour ce matricule")
     if (demande.get("code") or "").strip().upper() != p.code_enrolement:
         raise HTTPException(403, "Code d'enrôlement incorrect")
+    if p.code_expire_ms is not None and p.code_expire_ms < horloge.maintenant_ms():
+        raise HTTPException(403, "Code expiré : demander un nouveau code à la scolarité")
     defi = db.get(Defi, demande.get("defi", ""))
     if defi is None or defi.matricule != matricule or defi.expire_ms < horloge.maintenant_ms():
         raise HTTPException(403, "Défi expiré, recommencer")
@@ -167,6 +182,7 @@ def enroler(db: Session, demande: dict) -> dict:
         )
     )
     p.code_enrolement = None
+    p.code_expire_ms = None
     db.delete(defi)
     db.flush()
     return {

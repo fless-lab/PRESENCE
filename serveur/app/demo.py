@@ -48,17 +48,17 @@ ETUDIANTS = [
     ("Sefrioui", "Lina"),
     ("Tazi", "Amine"),
 ]
-SALLES = [(204, "Salle 204"), (103, "Salle 103")]
-OBSERVATEURS = [("204-A", 204), ("204-B", 204), ("103-A", 103)]
+SALLES = [(204, "Salle 204")]
+OBSERVATEURS = [("204-A", 204), ("204-B", 204)]
 
 
 def _csv() -> str:
-    lignes = ["matricule,nom,prenom,role,cours_code,cours_intitule,groupe"]
+    lignes = ["matricule,nom,prenom,role,cours_code,cours_intitule,groupe,filiere,niveau"]
     for m, n, p, code, intitule in ENSEIGNANTS:
-        lignes.append(f"{m},{n},{p},ENSEIGNANT,{code},{intitule},SESNUM 5")
+        lignes.append(f"{m},{n},{p},ENSEIGNANT,{code},{intitule},INE3,SESNUM,INE3")
     for i, (n, p) in enumerate(ETUDIANTS, start=1):
         for _, _, _, code, intitule in ENSEIGNANTS:
-            lignes.append(f"E{i:03d},{n},{p},ETUDIANT,{code},{intitule},SESNUM 5")
+            lignes.append(f"E{i:03d},{n},{p},ETUDIANT,{code},{intitule},INE3,SESNUM,INE3")
     return "\n".join(lignes) + "\n"
 
 
@@ -109,6 +109,37 @@ class Demo:
         r = self.c.post("/auth/connexion", json={"matricule": "A001", "mot_de_passe": mot_de_passe})
         r.raise_for_status()
         self.adm = {"Authorization": f"Bearer {r.json()['jeton']}"}
+
+    def planifier(self, mot_de_passe: str) -> None:
+        """Planning des jours à venir, avec un déplacement et une annulation notifiés."""
+        self.h.t = int(datetime.now(UTC).timestamp() * 1000)
+        self.connecter(mot_de_passe)
+        jour = datetime.now(UTC).date()
+        lignes, n = ["ref,cours_code,salle,debut,fin,enseignant,etat"], 0
+        while n < 10:
+            jour += timedelta(days=1)
+            if jour.weekday() >= 5:
+                continue
+            lignes.append(f"SECRES-{jour:%m%d},SECRES,204,{jour}T09:00,{jour}T11:00,,")
+            lignes.append(f"BLOCK-{jour:%m%d},BLOCK,204,{jour}T14:00,{jour}T16:00,,")
+            n += 2
+        self.c.post(
+            "/admin/planning/import",
+            headers=self.adm,
+            files={"fichier": ("planning.csv", "\n".join(lignes).encode(), "text/csv")},
+        ).raise_for_status()
+        creneaux = self.c.get("/admin/planning", headers=self.adm).json()["creneaux"]
+        deplace, annule = creneaux[0], creneaux[3]
+        self.c.patch(
+            f"/admin/planning/{deplace['id']}",
+            headers=self.adm,
+            json={"debut": deplace["debut_ms"] + 4 * 3_600_000, "motif": "Enseignant en mission"},
+        ).raise_for_status()
+        self.c.post(
+            f"/admin/planning/{annule['id']}/annulation",
+            headers=self.adm,
+            json={"motif": "Salle réservée pour un examen"},
+        ).raise_for_status()
 
     def sauvegarder(self) -> None:
         donnees = {
@@ -226,7 +257,7 @@ def executer(mot_de_passe: str, jours: int = 5) -> list[str]:
                 h.t = int((jour + timedelta(hours=8, minutes=58)).timestamp() * 1000)
                 seances.append(d.seance("P001", "SECRES", 204, 90))
                 h.t = int((jour + timedelta(hours=14, minutes=2)).timestamp() * 1000)
-                seances.append(d.seance("P002", "BLOCK", 103, 75))
+                seances.append(d.seance("P002", "BLOCK", 204, 75))
             if len(seances) >= 2:
                 d.connecter(mot_de_passe)
                 r = c.post(
@@ -239,6 +270,7 @@ def executer(mot_de_passe: str, jours: int = 5) -> list[str]:
                     },
                 )
                 r.raise_for_status()
+            d.planifier(mot_de_passe)
             d.sauvegarder()
     finally:
         horloge.maintenant_ms = vrai  # type: ignore[assignment]

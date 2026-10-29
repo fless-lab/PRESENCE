@@ -27,6 +27,9 @@ class Personne(Base):
     prenom: Mapped[str] = mapped_column(String(120))
     role: Mapped[str] = mapped_column(String(16))
     code_enrolement: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    code_expire_ms: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    filiere: Mapped[str] = mapped_column(String(32), default="", index=True)
+    niveau: Mapped[str] = mapped_column(String(16), default="", index=True)
     mot_de_passe: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     appareils: Mapped[list[Appareil]] = relationship(back_populates="personne")
@@ -84,6 +87,8 @@ class Cours(Base):
     code: Mapped[str] = mapped_column(String(32), unique=True, index=True)
     intitule: Mapped[str] = mapped_column(String(200))
     groupe: Mapped[str] = mapped_column(String(64), default="")
+    filiere: Mapped[str] = mapped_column(String(32), default="", index=True)
+    niveau: Mapped[str] = mapped_column(String(16), default="", index=True)
     enseignant_id: Mapped[int | None] = mapped_column(ForeignKey("personnes.id"), nullable=True)
 
     enseignant: Mapped[Personne | None] = relationship()
@@ -94,6 +99,51 @@ class Inscription(Base):
 
     cours_id: Mapped[int] = mapped_column(ForeignKey("cours.id"), primary_key=True)
     personne_id: Mapped[int] = mapped_column(ForeignKey("personnes.id"), primary_key=True)
+
+
+class Creneau(Base):
+    """Un cours prévu à une date, dans une salle. Venu du site de l'école ou créé ici."""
+
+    __tablename__ = "creneaux"
+    __table_args__ = (Index("creneaux_par_debut", "debut_ms"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    ref: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)
+    cours_id: Mapped[int] = mapped_column(ForeignKey("cours.id"), index=True)
+    salle_id: Mapped[int] = mapped_column(ForeignKey("salles.id"))
+    enseignant_id: Mapped[int | None] = mapped_column(ForeignKey("personnes.id"), nullable=True)
+    debut_ms: Mapped[int] = mapped_column(BigInteger)
+    fin_ms: Mapped[int] = mapped_column(BigInteger)
+    etat: Mapped[str] = mapped_column(String(8), default="PREVU")
+    origine: Mapped[str] = mapped_column(String(8), default="IMPORT")
+    modifie_localement: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Dernière version lue à l'import : sert à signaler un écart avec l'école
+    src: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    maj_ms: Mapped[int] = mapped_column(BigInteger)
+
+    cours: Mapped[Cours] = relationship()
+    salle: Mapped[Salle] = relationship()
+    enseignant: Mapped[Personne | None] = relationship()
+
+
+class Changement(Base):
+    """Journal des modifications du planning. Alimente les notifications."""
+
+    __tablename__ = "changements"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    creneau_id: Mapped[int] = mapped_column(ForeignKey("creneaux.id"), index=True)
+    cours_id: Mapped[int] = mapped_column(ForeignKey("cours.id"), index=True)
+    type: Mapped[str] = mapped_column(String(8))
+    avant: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    apres: Mapped[dict] = mapped_column(JSON)
+    motif: Mapped[str] = mapped_column(Text, default="")
+    auteur: Mapped[str] = mapped_column(String(48))
+    origine: Mapped[str] = mapped_column(String(8))
+    notifie: Mapped[bool] = mapped_column(Boolean, default=True)
+    horodatage: Mapped[int] = mapped_column(BigInteger)
+
+    cours: Mapped[Cours] = relationship()
 
 
 class Seance(Base):
